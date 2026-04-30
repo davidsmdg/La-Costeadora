@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, TrendingUp, TrendingDown, Mic, MessageSquare } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Mic } from 'lucide-react';
 
 const Timeline = () => {
   const navigate = useNavigate();

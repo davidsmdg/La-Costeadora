@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Target, TrendingUp, Award, Info } from 'lucide-react';
+import { ArrowLeft, Award, Info } from 'lucide-react';
 import * as Accordion from '@radix-ui/react-accordion';
 
 const MarketRadar = () => {
@@ -40,7 +40,7 @@ const MarketRadar = () => {
                 exit={{ x: 500, opacity: 0, rotate: 20 }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
-                onDragEnd={(e, info) => {
+                onDragEnd={(_, info) => {
                   if (info.offset.x > 100) setCurrentIndex(prev => (prev + 1) % competitors.length);
                 }}
                 className={`absolute inset-0 sticker-card ${comp.color} text-canvas flex flex-col items-center justify-center gap-6 p-12 cursor-grab active:cursor-grabbing`}

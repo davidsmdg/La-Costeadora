@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFinancialData } from '../context/FinancialContext';
 import * as Slider from '@radix-ui/react-slider';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-import { Camera, Home, Coffee, Bus, Briefcase, Plus, Check, TrendingUp } from 'lucide-react';
+import { Camera, Home, Coffee, Bus, Briefcase, Plus, TrendingUp } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 const Onboarding = () => {
@@ -114,7 +114,7 @@ const Onboarding = () => {
                         defaultValue={[500]}
                         max={5000}
                         step={100}
-                        onValueChange={(val) => {
+                        onValueChange={(_) => {
                           // In a real app we'd update state per item
                           // For demo we just add it
                         }}
@@ -155,7 +155,7 @@ const Onboarding = () => {
             <ToggleGroup.Root 
               type="multiple" 
               className="grid grid-cols-3 gap-4"
-              onValueChange={(vals) => {
+              onValueChange={(_) => {
                 // Handle logic
               }}
             >
@@ -197,7 +197,7 @@ const Onboarding = () => {
   );
 };
 
-const step4Content = (total, onFinish, setGoal) => (
+const step4Content = (total: number, onFinish: () => void, setGoal: (val: number) => void) => (
   <motion.div 
     key="step4"
     initial={{ opacity: 0, scale: 0.9 }}
