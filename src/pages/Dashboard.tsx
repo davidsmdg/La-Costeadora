@@ -1,15 +1,16 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useFinancialData } from '../context/FinancialContext';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer 
 } from 'recharts';
 import { 
   Plus, Home, Briefcase, Calendar, ChevronRight, 
-  ArrowUpRight, ArrowDownLeft, DollarSign 
+  DollarSign 
 } from 'lucide-react';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { projectName, bgImage, monthlyGoal, financialMetrics } = useFinancialData();
 
   const data = [
@@ -48,7 +49,7 @@ const Dashboard = () => {
                 startAngle={90}
                 endAngle={450}
               >
-                {data.map((entry, index) => (
+                {data.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index]} stroke="none" />
                 ))}
               </Pie>

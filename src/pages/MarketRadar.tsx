@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Target, TrendingUp, Award, Info } from 'lucide-react';
@@ -32,7 +32,7 @@ const MarketRadar = () => {
         {/* Tinder Stacks */}
         <div className="relative h-96 w-full perspective-1000">
           <AnimatePresence>
-            {competitors.slice(currentIndex, currentIndex + 1).map((comp, i) => (
+            {competitors.slice(currentIndex, currentIndex + 1).map((comp) => (
               <motion.div 
                 key={comp.name}
                 initial={{ scale: 0.8, opacity: 0, rotate: -5 }}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useFinancialData } from '../context/FinancialContext';
 import * as Slider from '@radix-ui/react-slider';
