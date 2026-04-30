@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --font-disp: "Space Grotesk", sans-serif;
+  --font-text: "Inter", sans-serif;
+  --font-mono: "Martian Mono", monospace;
+
+  --color-pop-blue: #2727e6;
+  --color-pop-green: #00c853;
+  --color-pop-yellow: #ffd600;
+  --color-pop-red: #ff3d00;
+  --color-pop-pink: #ff8fa3;
+  --color-canvas: #111118;
+}
+
+:root {
+  --body-bg: #111118;
+  --body-foreground: #ffffff;
+}
+
+@layer base {
+  body {
+    background-color: var(--body-bg);
+    color: var(--body-foreground);
+    font-family: var(--font-text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-disp);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer components {
+  .sticker-card {
+    @apply bg-white text-canvas p-6 rounded-2xl border-2 border-canvas shadow-[4px_4px_0px_#000] transition-transform;
+  }
+
+  .pill-button {
+    @apply rounded-full px-8 py-3 font-disp font-bold uppercase transition-all active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .neo-input {
+    @apply bg-transparent border-b-4 border-white text-white font-disp text-2xl py-2 outline-none placeholder:opacity-30 focus:border-pop-blue transition-colors;
+  }
+}
+
+/* Marquee Animation */
+.rfm-marquee-container {
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  width: 100%;
+}
+
+.rfm-marquee {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  animation: scroll 20s linear infinite;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+
+.marquee-overlay::before,
+.marquee-overlay::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 50px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.marquee-overlay::before {
+  left: 0;
+  background: linear-gradient(to right, var(--body-bg), transparent);
+}
+
+.marquee-overlay::after {
+  right: 0;
+  background: linear-gradient(to left, var(--body-bg), transparent);
+}

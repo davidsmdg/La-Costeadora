@@ -1,0 +1,411 @@
+Descripción General del Proyecto
+"Studio Financiero" es una Aplicación Web Progresiva (PWA) interactiva diseñada para la realidad del emprendedor creativo moderno (artesanos, muralistas, diseñadores, freelancers). El objetivo de la aplicación es traducir conceptos financieros complejos (punto de equilibrio, flujo de caja, costeo de proyectos y productos) a un lenguaje visual, amigable y altamente intuitivo.
+
+El sistema debe operar bajo la premisa de que el creativo no está en un escritorio. La app está pensada para usarse con una sola mano, en medio de un taller o en la calle, permitiendo registrar datos financieros sin fricción y ofreciendo un panorama claro de la salud del negocio de un solo vistazo.
+
+2. Pila Tecnológica
+La aplicación mantiene un ecosistema robusto, pero optimizado para rendimiento móvil:
+
+Framework Core: React 18 con TypeScript y Vite (Configurado como PWA para instalación en celulares).
+
+Enrutamiento: React Router v7.
+
+Estilos y UI: TailwindCSS v4, enfocado en utilidades responsivas. Se integran componentes accesibles de Radix UI (ideales para modales y menús táctiles) y animaciones fluidas de Framer Motion.
+
+Gráficos: Recharts para la visualización de datos (optimizados para pantallas estrechas, priorizando interactividad táctil).
+
+Gestión de Estado: Context API (FinancialDataContext) o Zustand, diseñado para manejar estados globales complejos que ahora incluyen no solo productos, sino también "Proyectos a medida", "Inventario global" y "Flujos de caja fraccionados".
+
+3. Filosofía del Sistema y Reglas de Diseño (UX/UI)
+Para que Antigravy desarrolle correctamente el front-end, debe adherirse estrictamente a los siguientes principios de diseño:
+
+Mobile-First Absoluto: Todo el diseño parte de una pantalla de celular (aprox. 375px a 430px de ancho). Los elementos deben ser fáciles de tocar (tap targets grandes), y la navegación principal debe estar al alcance del pulgar (ej. en la parte inferior). La versión de escritorio será una expansión fluida de esta vista móvil, no al revés.
+
+Divulgación Progresiva (Progressive Disclosure): Es la regla de oro para la interfaz. Las pantallas principales deben ser extremadamente limpias, mostrando solo los "números grandes", gráficos resumidos e íconos expresivos (Lucide-react). La complejidad (tablas densas, formularios largos, desgloses matemáticos) debe estar oculta por defecto y revelarse solo cuando el usuario toca un botón de "Ver detalles", "Analizar" o abre un panel expansible.
+
+Diseño "Cristalino" y Reductor de Ansiedad: Mantener el uso de fondos oscuros elegantes (Dark Mode preferido) con efectos de cristalismo (backdrop-blur). Los colores deben usarse estratégicamente: semáforos visuales (verde, rojo, amarillo) para indicar salud financiera, evitando paredes de texto que generen "ansiedad matemática".
+
+Flexibilidad del Negocio Creativo (Proyectos vs. Productos): La lógica interna debe soportar dos realidades:
+
+El Catálogo: Productos fijos estandarizados (ej. una mochila, una lámina).
+
+El Proyecto a Medida: Servicios variables (ej. pintar un mural), que requieren costear tiempo (horas/días), materiales específicos del inventario, viáticos, e hitos de cobro (anticipos).
+
+4. Design System y Dirección de Arte Técnica (Estilo "Editorial Pop / Neo-Brutalismo")
+El sistema de diseño se basa en un enfoque de alto contraste, colores vibrantes de bloque sólido, asimetría controlada y una arquitectura de componentes plana (flat design) tipo "Sticker". Antigravity debe configurar Tailwind CSS v4 y el CSS global con las siguientes especificaciones técnicas exactas:
+
+4.1. Sistema Tipográfico (CSS Variables)
+El HTML de referencia define tres familias tipográficas críticas que deben mapearse en Tailwind. Se deben definir en el archivo CSS principal (ej. globals.css) como variables nativas:
+
+--font-family-disp (Display): Para Headers gigantes, números de impacto y KPIs. Debe ser una fuente grotesca sans-serif muy pesada y con tracking ajustado (ej. Clash Display, Space Grotesk o similar a Haas Grot).
+
+--font-family-text (Body): Para la lectura general, etiquetas y tooltips. Sans-serif limpia y legible (ej. Inter o Geist).
+
+--font-family-mono (Monospace): OBLIGATORIO para todos los datos financieros, tablas, matrices y el "Diario". (ej. Martian Mono, JetBrains Mono).
+
+Directiva Tailwind v4: Mapear estas variables a font-disp, font-text y font-mono en la configuración del tema.
+
+4.2. Paleta de Colores y Tokens (Tailwind Theme)
+Debe evitarse el uso de degradados complejos (salvo en overlays específicos). La paleta debe configurarse con colores sólidos y de máxima saturación, basados en el referente:
+
+Backgrounds (--body-bg): Blanco puro (#FFFFFF) o gris muy claro/hueso (#F8F9FA) para el modo claro. Si se implementa modo oscuro, usar un negro asfalto profundo (#111118, como se ve en los SVGs del referente).
+
+Foreground/Text (--body-foreground): #111118 para máxima legibilidad.
+
+Colores de Acento (Tarjetas y Botones):
+
+primary-blue: #2727e6 (Extraído del meta theme-color del referente. Usar para acciones principales).
+
+pop-green: Verde brillante sólido (Para ingresos/superávit).
+
+pop-orange: Naranja saturado (Para alertas/gastos/viáticos).
+
+pop-pink: Rosa pastel/salmón.
+
+pop-yellow: Amarillo mostaza (Para stickers informativos).
+
+4.3. Arquitectura de Componentes de UI
+Antigravity debe crear componentes base (usando Radix UI para la accesibilidad) con las siguientes reglas visuales:
+
+Botones (Pill-shape): Formas completamente redondeadas (rounded-full). Sin drop-shadows suaves. Si llevan sombra, debe ser sólida/dura (box-shadow: 2px 2px 0px #111118) o carecer de ella.
+
+Paneles y Tarjetas (Componente Panel): Las tarjetas de proyectos o insights deben tener bordes redondeados (rounded-xl o rounded-2xl).
+
+Efecto "Sticker" (Cluster Layout): En vistas como el "Dashboard" o el "Punto de Equilibrio", los elementos no deben estar en una cuadrícula (grid) perfecta. Antigravity debe crear un componente contenedor que aplique clases de rotación aleatorias o predefinidas (-rotate-2, rotate-3, -rotate-1) y superposición con márgenes negativos (ej. -ml-4) combinado con z-index dinámicos para simular notas apiladas.
+
+4.4. Implementación del Componente Dinámico: <Marquee />
+El HTML de referencia muestra un uso intensivo de banners desplazables. Antigravity debe recrear exactamente esta lógica CSS para las entradas del "Diario Financiero" y alertas de estado:
+
+Estructura CSS Obligatoria:
+
+CSS
+.rfm-marquee-container {
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  width: 100%;
+}
+.rfm-marquee {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  animation: scroll var(--duration) linear infinite;
+}
+@keyframes scroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+Overlay de Degradado: Debe incluir los seudoelementos ::before y ::after con linear-gradient para difuminar los bordes izquierdo y derecho del marquee, evitando cortes bruscos en la pantalla del celular.
+
+4.5. Sistema de Animaciones (Framer Motion)
+Las animaciones no deben ser lineales ni "fade-ins" aburridos. Deben sentirse físicas y "elásticas".
+
+Directiva Framer Motion: Para la entrada progresiva (Progressive Disclosure) de elementos de detalle (ej. abrir el desglose de Gastos Fijos), usar la configuración type: "spring".
+
+Ejemplo de variante estándar: initial={{ opacity: 0, y: 30, rotate: -2 }} a animate={{ opacity: 1, y: 0, rotate: 0 }}.
+
+Transición recomendada: { stiffness: 300, damping: 20, mass: 1 }.
+
+5. Flujo de Onboarding: "Configurando tu Estudio" (Setup Inicial)
+El Onboarding no debe sentirse como un formulario de impuestos, sino como la creación de un perfil en un videojuego o una red social creativa. El objetivo técnico de este flujo es inicializar el FinancialDataContext con los Gastos Fijos Personales, Gastos Fijos del Negocio y el Objetivo Financiero, para alimentar automáticamente el Dashboard y el módulo de BreakEven.
+
+Antigravity debe construir este flujo como un asistente paso a paso (Wizard) de 4 pantallas, utilizando animaciones de transición horizontales (deslizamiento) con framer-motion.
+
+5.1. Pantalla 1: El Santuario (Conexión Emocional)
+Objetivo: Capturar el nombre del proyecto y una imagen de fondo que personalizará toda la app.
+
+UI/Componentes:
+
+Un titular gigante usando font-disp (ej. "Primero, bautiza tu espacio").
+
+Un input de texto minimalista, sin bordes, solo una línea inferior gruesa para escribir el "Nombre del Proyecto".
+
+Un área grande de "Dropzone" o un botón circular expansivo con el icono de una cámara (Lucide: Camera).
+
+Lógica/Interacción: Al subir o tomar la foto, la imagen debe pasar por un filtro CSS (filter: grayscale(50%) brightness(40%) blur(4px)) y establecerse como el fondo fijo (fixed background) de la aplicación, para que las siguientes interfaces floten sobre el "taller" del usuario.
+
+5.2. Pantalla 2: El Combustible (Gastos Personales Básicos)
+Objetivo: Calcular la línea base de supervivencia personal sin usar tablas aburridas.
+
+UI/Componentes:
+
+Título: "Para crear, hay que vivir. ¿Cuáles son tus gastos básicos mensuales?"
+
+Tarjetas Interactivas ("Stickers"): Tres tarjetas de colores sólidos (ej. Azul, Amarillo, Rosa pastel) ligeramente rotadas (rotate-1, -rotate-2).
+
+Tarjeta 1: 🏠 Techo y Servicios.
+
+Tarjeta 2: ☕ Comida y Mercado.
+
+Tarjeta 3: 🚌 Transporte y Movimiento.
+
+Controles (Radix UI): En lugar de inputs de texto estándar, usar un componente Slider (deslizador) grueso y táctil para aproximar el valor, acompañado de un número en font-mono grande que se actualiza en tiempo real al mover el dedo. Se debe incluir un botón de "teclado" por si el usuario quiere teclear el monto exacto.
+
+5.3. Pantalla 3: Las Herramientas del Oficio (Gastos del Negocio)
+Objetivo: Separar contablemente el negocio de la vida personal.
+
+UI/Componentes:
+
+Malla de Suscripciones (Toggle Group): Una cuadrícula de botones cuadrados con logos o iconos de herramientas creativas comunes (Adobe CC, Canva, Spotify, Figma, Notion, ChatGPT).
+
+Interacción: Al hacer tap en un icono, este se resalta con un borde neón (ej. ring-2 ring-pop-green) y suma un valor promedio estandarizado al total, abriendo un mini-tooltip por si el usuario desea editar ese valor.
+
+Inputs adicionales: Dos botones expansibles estilo "Acordeón" para agregar: "Alquiler de Taller (si aplica)" y "Cuotas de Equipos (ej. iPad, Cámara)".
+
+5.4. Pantalla 4: El Horizonte (La Meta Mágica)
+Objetivo: Definir el superávit deseado para establecer la meta principal del Dashboard.
+
+UI/Componentes:
+
+Selector Visual de Metas: Tres cajas grandes ilustradas o con emojis (Viaje de Inspiración ✈️, Mejorar Equipo 🖥️, Colchón de Paz Mental 💰). El usuario debe seleccionar una.
+
+El Cálculo Mágico (Revelación): Una vez ingresado el monto de la meta, la pantalla hace una transición dramática (fondo oscuro, texto brillante).
+
+Visualización de Datos: Usando font-mono en tamaño extragrande, la pantalla revela la suma matemática de forma animada (cuenta progresiva de 0 al valor real):
+
+Gastos Vida + Gastos Taller + Porción de Meta = TU META MENSUAL ESTE AÑO.
+
+Transición Final: Un botón masivo de "¡A Romperla!" que, al presionarlo, dispare una animación de confeti (librería canvas-confetti o similar) y redirija suavemente al Dashboard (Home), revelando por primera vez el anillo de progreso configurado.
+
+🛠️ MASTER PRD & DEV PROMPT: "Studio Financiero" (PWA Mobile-First)
+1. Contexto del Proyecto y Filosofía
+Actúa como un Senior Full-Stack Engineer experto en React y UI/UX. Tu tarea es desarrollar "Studio Financiero", una aplicación web progresiva (PWA) de gestión financiera para creativos (artesanos, muralistas, freelancers).
+
+Filosofía: El usuario odia la contabilidad. La app debe sentirse como una red social o un videojuego: interacciones de un solo toque (Mobile-First), divulgación progresiva (ocultar la complejidad matemática en modales inferiores) y un sistema visual "Editorial Pop / Neo-Brutalista" (alta asimetría, colores sólidos, bloques gruesos).
+
+2. Pila Tecnológica
+Core: React 18 (TypeScript), Vite (PWA configurado).
+
+Routing: React Router v7.
+
+Styling: Tailwind CSS v4.
+
+Componentes base & Accesibilidad: Radix UI (Dialog, Slider, ToggleGroup).
+
+Animaciones: Framer Motion (type: "spring" para todo, animaciones de layout).
+
+Gráficos: Recharts (RadialBarChart, PieChart) altamente estilizados.
+
+Gestión de Estado: Context API (FinancialDataContext) o Zustand.
+
+3. Design System (Configuración Tailwind & CSS)
+Configura el tema global con las siguientes directivas:
+
+Tipografía:
+
+font-disp: Grotesca pesada (ej. Clash Display, Space Grotesk) para Títulos y KPIs.
+
+font-text: Sans-serif limpia (ej. Inter) para lectura general.
+
+font-mono: Monoespaciada (ej. Martian Mono) obligatoria para todos los datos numéricos y de moneda.
+
+Colores (Tailwind Theme):
+
+bg-canvas: Fondo base oscuro (#111118) o hueso (#F8F9FA). El onboarding puede inyectar una imagen de fondo con filter: blur(8px) brightness(0.4).
+
+pop-blue: #2727E6 (Acciones principales).
+
+pop-green: #00C853 (Márgenes saludables >60%, ingresos).
+
+pop-yellow: #FFD600 (Márgenes de alerta 40%-60%, insights).
+
+pop-red: #FF3D00 (Márgenes críticos <40%, gastos fijos).
+
+UI Elements:
+
+Botones y "Stickers": rounded-2xl o rounded-full, sin sombras difuminadas. Usar sombras duras (box-shadow: 4px 4px 0px #000) o diseño plano total.
+
+Rotaciones: Usar clases de utilidad -rotate-2, rotate-3 para dar efecto asimétrico a las tarjetas.
+
+4. Núcleo Matemático (Lógica de Estado Global)
+Implementa las siguientes fórmulas exactas en el Estado Global o hooks (ej. useProjectMath):
+
+Fórmulas de Costeo:
+
+productionTotal = SUM(prod.quantity * prod.unitPrice)
+
+distributionTotal = SUM(dist.quantity * dist.unitPrice)
+
+investmentPerUnit = estimatedUnits > 0 ? initialInvestment / estimatedUnits : 0
+
+productCost = productionTotal + distributionTotal + investmentPerUnit
+
+Margen de Ganancia (El KPI más importante):
+
+profitMargin = ((sellingPrice - productCost) / sellingPrice) * 100
+
+Punto de Equilibrio (Distribución Equitativa):
+
+Importante: El sistema NO usa margen de contribución ponderado. Los gastos fijos se dividen por igual entre proyectos activos.
+
+productFixedShare = totalFixedExpenses / products.length
+
+unitContribution = sellingPrice - productCost
+
+unitsNeeded = Math.ceil(productFixedShare / unitContribution)
+
+revenueNeeded = unitsNeeded * sellingPrice
+
+Valor de Autoría (UI Marker): No afecta matemáticamente al productCost. Es un booleano (affectedByAuthorship: true) que aplica un borde neón y un ícono (⭐) a ese ítem de costo en la UI para recordarle al creativo que cobre su talento.
+
+5. Arquitectura de Interfaces (Step-by-Step)
+Interfaz 1: Onboarding Wizard ("Configurando tu Estudio")
+Flujo inicial de 4 pasos (Framer motion horizontal slide) para inicializar el Estado Global.
+
+Santuario: Input font-disp para "Nombre del Proyecto". Botón para subir foto (se establece como bg-image global con blur).
+
+Gastos Personales: 3 tarjetas apiladas asimétricamente (Casa, Comida, Transporte). Usar componente Slider de Radix UI para ingresar valores.
+
+Gastos Negocio: Cuadrícula de botones cuadrados (Logos: Adobe, Spotify, Taller). Al hacer tap, se iluminan y suman un valor predeterminado editable al total de gastos fijos.
+
+La Meta: Selector de "Bucket" (Viaje, Equipo, Ahorro). Se ejecuta un conteo animado (0 a MetaMensual). FÓRMULA: ObjetivoMensual = Gastos Personales + Gastos Negocio + (Meta Extra / 12). Un botón dispara confeti y navega al Dashboard.
+
+Interfaz 2: Dashboard (Home)
+Layout principal con Bottom Tab Bar flotante tipo píldora (Inicio, Proyectos, Diario).
+
+Sticky Header (El Norte):
+
+Componente: Un Anillo SVG grueso que se llena de 0 a 100% hacia el ObjetivoMensual.
+
+Centro: Saldo actual en font-mono gigante.
+
+Marquee Financiero:
+
+Implementar un contenedor CSS con animation: scroll 20s linear infinite.
+
+Contenido: Últimas 5 transacciones (ej. "🚕 Taxi -$15k • 💰 Anticipo +$200k").
+
+Feed de Proyectos (Gráficas Orgánicas):
+
+Mapeo del array products. Cada uno es un div horizontal (barra).
+
+width: Relativo al sellingPrice * estimatedUnits del proyecto mayor.
+
+bg-color: Evaluado dinámicamente según profitMargin (verde, amarillo, rojo).
+
+texture: El % del proyecto ya cobrado es color sólido; el saldo pendiente tiene background-image: repeating-linear-gradient(...) (rayas diagonales).
+
+Interacción: Al hacer tap, NO navegar. Abrir un Bottom Sheet (Radix Dialog).
+
+FAB (Floating Action Button): Botón "+" masivo abajo a la derecha. Abre un menú rápido: "Nuevo Proyecto" o "Registrar Movimiento".
+
+Interfaz 3: Bottom Sheet (Quick View del Proyecto)
+Al tocar una barra en el Dashboard, sube un modal inferior.
+
+Muestra el profitMargin en tamaño gigante.
+
+Barra de progreso lineal: "Cobrado vs Pendiente".
+
+Dos botones masivos: "✏️ Editar/Analizar" y "💵 Añadir Transacción".
+
+Interfaz 4: "El Estudio" (Vista Detalle y Simulador Integrado)
+Vista scrolleable cuando el usuario da clic en "Editar/Analizar".
+
+Sticky Traffic Light (Cabecera): Muestra el Precio Sugerido y el Margen (%). Debe estar envuelto en un useMemo para actualizarse en tiempo real si el usuario mueve los sliders.
+
+La Receta (Desglose): Lista iterativa de materiales. Cada ítem tiene un toggle (Radix Switch) de "Estrella de Autoría" (afecta solo el CSS del ítem, borde ámbar).
+
+El Laboratorio (Sandbox/Sliders):
+
+Remplaza el antiguo simulador de tabla. Renderiza 3 componentes Slider masivos y táctiles.
+
+Variables atadas a los sliders: unitCost (Naranja), sellingPrice (Verde), unitsPerMonth (Índigo).
+
+Al moverlos, el profitMargin del Sticky Header parpadea y se recalcula instantáneamente (usar debounce si afecta el rendimiento).
+
+Punto de Equilibrio (Footer): Gráfico circular (Recharts PieChart) muy simple. Muestra el productFixedShare y el revenueNeeded calculado en el paso 4. Texto explicativo: "Este proyecto debe pagar el X% de tu arriendo".
+
+6. Consideraciones de Desarrollo
+Móvil Estricto: Ocultar scrollbars. Asegurar que los tap-targets midan al menos 44x44px.
+
+Progressive Disclosure: Los cálculos complejos (unitsNeeded, unitContribution) no deben llenar la pantalla por defecto. Mantenerlos en tooltips expansibles (Accordion) bajo textos simples.
+
+Interfaz 5: "El Cofre" (Gestión de Inventario y Materiales)
+Sustituye la antigua lista de costos variables por un gestor visual de stock global.
+
+Lógica de Estado (Context):
+
+Añadir al contexto global un array inventoryItems: { id, name, unit, totalQuantity, threshold, unitCost }.
+
+Cuando se crea un producto en "El Estudio" y se le asignan materiales, el sistema calcula cuántas unidades del producto se pueden hacer con el stock actual.
+
+UI Visual (Progress Bars):
+
+Renderizar una lista vertical de tarjetas. Cada tarjeta representa un material.
+
+Usar el componente Progress de Radix UI con altura gruesa (h-4 o h-6).
+
+Colores dinámicos del stock: * Verde (bg-pop-green): Stock > 50%.
+
+Amarillo (bg-pop-yellow): Stock 20% - 50%.
+
+Rojo animado (bg-pop-red animate-pulse): Stock < 20% (Nivel crítico).
+
+Interacción (Reabastecer): * Botón de "+ Reabastecer" en cada tarjeta. Abre un modal rápido para ingresar la cantidad comprada y el costo. Esto debe disparar automáticamente un evento addTransaction tipo Gasto en el Diario Financiero.
+
+Interfaz 6: La Línea de Tiempo y Diario (CashFlow & VoiceJournal)
+Fusión de las proyecciones a 12 meses (CashFlow.tsx) y el registro diario (VoiceJournal.tsx) en un feed vertical unificado (pasado hacia abajo, futuro hacia arriba).
+
+Alerta de Liquidez (Banner Superior):
+
+FÓRMULA: accumulatedCash = Σ transacciones reales + Σ proyecciones del mes próximo.
+
+UI: Un banner fijo estilo Neo-Brutalista. Si el accumulatedCash es menor a 0, mostrar fondo bg-pop-red con texto en font-disp gigante: "⚠️ Déficit proyectado: Faltarán $[Monto] el próximo mes. ¡Activa cobros!". Si es positivo, ocultar o mostrar en verde.
+
+El Futuro (Hitos de Cobro y Pagos):
+
+Muestra tarjetas translúcidas o con borde punteado (border-dashed) que representan el dinero que entrará o saldrá en los próximos 30-60 días, basado en los "Anticipos" de los proyectos activos y los "Gastos Fijos" mensuales.
+
+El Pasado (Feed del Diario):
+
+Interfaz estilo Chat. Ingresos (bg-pop-green) alineados a la derecha; Gastos (bg-pop-red o bg-zinc-800) alineados a la izquierda.
+
+Tipografía de montos siempre en font-mono.
+
+Input de Registro Rápido (El Micrófono):
+
+Un contenedor flotante inferior o modal (activado desde el FAB del Dashboard).
+
+Input de texto gigante y un botón de micrófono.
+
+Simulador NLP: Al teclear/hablar algo como "Gasté 50k en pintura", un parser extrae: type: 'expense', amount: 50000, category: 'materiales'.
+
+Interfaz 7: Radar de Mercado (Benchmarking Visual)
+Transforma la antigua tabla comparativa en una interfaz interactiva de tarjetas apiladas.
+
+Selección y Data: * Dropdown gigante para seleccionar uno de los productos activos.
+
+Mapear el array mockeado de competidores (BenchmarkData).
+
+Tinder Financiero (Stack UI):
+
+Usar framer-motion para renderizar a los competidores como tarjetas físicas apiladas (usando z-index y rotaciones aleatorias -rotate-2, rotate-3 para el efecto "sticker").
+
+KPIs de Posicionamiento (font-mono):
+
+Mostrar "Tu Precio", "Promedio Mercado" y "Diferencia %".
+
+Lógica de Badges: * Tu Precio < 80% del Promedio ➔ Badge Azul (Económico).
+
+Tu Precio 80%-120% del Promedio ➔ Badge Amarillo (Promedio).
+
+Tu Precio > 120% del Promedio ➔ Badge Verde (Premium).
+
+El Consejero Dinámico (Divulgación Progresiva):
+
+Un componente Accordion de Radix UI en la parte inferior.
+
+Renderizado condicional del texto: Si la diferencia es < -30%, mostrar alerta en bg-pop-yellow con el texto: "Estás cobrando muy por debajo del mercado. Sube el precio gradualmente y fortalece el storytelling de tu marca".
+
+7. Instrucciones Finales para el Agente (Ejecución)
+Paso 1: Inicializa el proyecto Vite + React + TypeScript.
+
+Paso 2: Configura Tailwind v4 con las variables de fuentes (font-disp, font-mono, font-text) y los colores Neo-Brutalistas (pop-green, pop-yellow, pop-red, pop-blue).
+
+Paso 3: Construye el FinancialDataContext con los tipos y fórmulas matemáticas especificadas.
+
+Paso 4: Desarrolla las interfaces iterativamente comenzando por el Onboarding Wizard y luego el Dashboard, asegurando que la navegación móvil (Bottom Tab Bar) esté siempre presente.
+
+Regla de Oro: NO renderizar tablas densas. Usa siempre sliders, progress bars, pie charts o stacks de tarjetas animadas con Framer Motion. Oculta el detalle tras interacciones táctiles (taps, bottom sheets).
