@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, ArrowRight, ArrowLeft, Star, Clock, 
   Package, Truck, Utensils, Construction,
-  Search, AlertCircle, Save, ChevronRight
+  Search, AlertCircle, Save, ChevronRight, Plus
 } from 'lucide-react';
 import * as Accordion from '@radix-ui/react-accordion';
 import * as Slider from '@radix-ui/react-slider';

@@ -58,7 +58,7 @@ export default function CreationPage() {
       id: Math.random().toString(36).substr(2, 9),
       name: invItem.name,
       quantity: qty,
-      unitPrice: invItem.unitPrice,
+      unitPrice: invItem.unitCost,
       category: 'production',
       affectedByAuthorship: false,
       inventoryId: invItem.id // Referencia para restar stock luego
@@ -96,7 +96,8 @@ export default function CreationPage() {
       initialInvestment: creationType === 'project' ? 0 : investment.total,
       productionCosts: materials,
       distributionCosts: creationType === 'project' ? logistics : [],
-      amountCollected: 0
+      amountCollected: 0,
+      createdAt: new Date().toISOString()
     };
 
     // 1. Agregar a la lista global
@@ -317,7 +318,7 @@ export default function CreationPage() {
         {creationType === 'product' && (
           <section className="space-y-4">
             <div className="flex items-center gap-2">
-               <construction size={18} className="text-pop-pink" />
+               <Construction size={18} className="text-pop-pink" />
                <h2 className="font-disp font-black uppercase text-sm tracking-widest text-zinc-400">Inversión y Lote</h2>
             </div>
             <div className="bg-pop-blue p-8 rounded-[40px] text-white shadow-brutal space-y-8">

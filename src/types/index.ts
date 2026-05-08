@@ -31,6 +31,8 @@ export interface CostItem {
   category: 'production' | 'distribution' | 'investment';
   /** Si es true, muestra borde ámbar ⭐ en la UI. No afecta el cálculo de costo. */
   affectedByAuthorship: boolean;
+  /** Referencia opcional al item de inventario global */
+  inventoryId?: string;
 }
 
 // ─── Inventario Global ───────────────────────────────────────
