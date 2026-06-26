@@ -8,7 +8,7 @@ import * as Switch from '@radix-ui/react-switch';
 import { 
   X, Plus, Star, Info, ArrowLeft, Save, 
   Construction, Package, Briefcase, Truck, 
-  Trash2, AlertTriangle, Search
+  Trash2, AlertTriangle, Search, HelpCircle
 } from 'lucide-react';
 import { useFinancialData } from '../context/FinancialDataContext';
 import { Product, CostItem, InventoryItem } from '../types';
@@ -25,6 +25,9 @@ export default function CreationPage() {
   const [logistics, setLogistics] = useState<CostItem[]>([]);
   const [investment, setInvestment] = useState({ total: 0, estimatedUnits: 1 });
   const [sellingPrice, setSellingPrice] = useState(0);
+
+  // Help State
+  const [helpContent, setHelpContent] = useState<{ title: string; description: string } | null>(null);
 
   // Modal State
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
@@ -267,8 +270,19 @@ export default function CreationPage() {
             
             {/* INPUT NOMBRE (Primer campo a rellenar) */}
             <section className="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.015)] flex flex-col gap-2.5">
-               <label className="font-mono text-[9px] uppercase font-bold text-slate-400">
-                 {creationType === 'project' ? 'Nombre de tu proyecto a medida' : 'Nombre de tu producto'}
+               <label className="font-mono text-[9px] uppercase font-bold text-slate-400 flex items-center gap-1.5">
+                 <span>{creationType === 'project' ? 'Nombre de tu proyecto a medida' : 'Nombre de tu producto'}</span>
+                 <button
+                   type="button"
+                   onClick={() => setHelpContent({
+                     title: creationType === 'project' ? 'Nombre del Proyecto a Medida' : 'Nombre del Producto',
+                     description: 'Escribe un nombre claro para identificar este desarrollo en tu bitácora o catálogo. Si es a medida, puedes incluir el nombre del cliente o el lugar. Si es un lote de productos, define el nombre del modelo o la serie.'
+                   })}
+                   className="text-slate-350 hover:text-slate-600 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
+                   title="Ver explicación"
+                 >
+                   <HelpCircle size={10} />
+                 </button>
                </label>
                <input 
                 type="text" 
@@ -284,6 +298,17 @@ export default function CreationPage() {
                <div className="flex items-center gap-1.5">
                   <Briefcase size={15} className="text-[hsl(var(--color-primary))]" />
                   <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Mano de Obra</h2>
+                  <button
+                    type="button"
+                    onClick={() => setHelpContent({
+                      title: 'Mano de Obra',
+                      description: 'Define cuánto vale tu tiempo de trabajo. Elige si cobrarás una tarifa por hora o por día, y la cantidad de tiempo total estimada que te tomará realizar la obra o producir el lote completo.'
+                    })}
+                    className="text-slate-350 hover:text-slate-650 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
+                    title="Ver explicación"
+                  >
+                    <HelpCircle size={11} />
+                  </button>
                </div>
                <div className="bg-white p-6 rounded-3xl border border-slate-100 flex flex-col gap-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
                   <div className="flex justify-between items-center">
@@ -320,11 +345,20 @@ export default function CreationPage() {
 
             {/* 2. Costos de Creación */}
             <section className="space-y-3.5">
-               <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                     <Package size={15} className="text-[hsl(var(--color-secondary))]" />
-                      <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Costos de Creación</h2>
-                  </div>
+               <div className="flex items-center gap-1.5">
+                  <Package size={15} className="text-[hsl(var(--color-secondary))]" />
+                  <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Costos de Creación</h2>
+                  <button
+                    type="button"
+                    onClick={() => setHelpContent({
+                      title: 'Costos de Creación',
+                      description: 'Suma todos los materiales consumidos, mermas o insumos que requiere esta pieza. Si creas un producto en lote, puedes marcar insumos específicos como "Fijo" (el costo de un molde o matriz que se paga una sola vez y se divide entre todas las unidades) o "Variable" (el material consumido por cada unidad individual).'
+                    })}
+                    className="text-slate-350 hover:text-slate-650 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
+                    title="Ver explicación"
+                  >
+                    <HelpCircle size={11} />
+                  </button>
                </div>
                
                <div className="flex flex-col gap-2.5">
@@ -408,6 +442,17 @@ export default function CreationPage() {
                        <div className="flex items-center gap-1.5">
                           <Truck size={15} className="text-amber-500" />
                           <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Logística y Viáticos</h2>
+                          <button
+                            type="button"
+                            onClick={() => setHelpContent({
+                              title: 'Logística y Viáticos',
+                              description: 'Exclusivo para Proyectos a Medida. Registra todos los costos de entrega, transporte, pasajes, comidas u hospedajes necesarios para llevar a cabo el proyecto en su locación final.'
+                            })}
+                            className="text-slate-350 hover:text-slate-650 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
+                            title="Ver explicación"
+                          >
+                            <HelpCircle size={11} />
+                          </button>
                        </div>
                        <span className="font-mono text-xs font-bold text-slate-500">${math.logisticsTotal.toLocaleString()}</span>
                     </div>
@@ -443,6 +488,17 @@ export default function CreationPage() {
                     <div className="flex items-center gap-1.5">
                        <Construction size={15} className="text-[hsl(var(--color-primary))]" />
                        <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Inversión y Lote</h2>
+                       <button
+                         type="button"
+                         onClick={() => setHelpContent({
+                           title: 'Inversión y Lote',
+                           description: 'Exclusivo para Lotes de Productos. Registra la inversión inicial no-material (ej. diseño conceptual, matricería, prototipado) y el número estimado de unidades que producirás en este lote. El sistema amortizará esta inversión dividiéndola entre las unidades.'
+                         })}
+                         className="text-slate-350 hover:text-slate-650 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
+                         title="Ver explicación"
+                       >
+                         <HelpCircle size={11} />
+                       </button>
                     </div>
                     <div className="bg-slate-900 p-6 rounded-[2rem] text-white shadow-md space-y-6">
                        <div className="grid grid-cols-2 gap-6">
@@ -487,7 +543,20 @@ export default function CreationPage() {
             <section className="bg-white border border-slate-100 rounded-3xl p-6.5 shadow-[0_4px_20px_rgba(0,0,0,0.015)] space-y-6">
                <div className="space-y-4">
                   <div className="flex justify-between items-center gap-4">
-                     <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Fijar Precio Final</h2>
+                     <div className="flex items-center gap-1.5">
+                        <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Fijar Precio Final</h2>
+                        <button
+                          type="button"
+                          onClick={() => setHelpContent({
+                            title: 'Fijar Precio Final',
+                            description: 'El precio al que planeas vender la pieza única o cada unidad individual del lote. Al mover el control deslizante, podrás ver el porcentaje de margen de ganancia neto estimado en tiempo real (El Semáforo superior cambiará de color según la rentabilidad).'
+                          })}
+                          className="text-slate-350 hover:text-slate-650 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
+                          title="Ver explicación"
+                        >
+                          <HelpCircle size={11} />
+                        </button>
+                     </div>
                      <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-3 py-2 rounded-xl focus-within:border-[hsl(var(--color-primary))]/50 transition-colors">
                         <span className="font-mono text-xs text-slate-400 font-bold">$</span>
                         <input
@@ -732,6 +801,48 @@ export default function CreationPage() {
               </div>
            </Dialog.Content>
         </Dialog.Portal>
+      </Dialog.Root>
+
+      {/* Modal para Explicación / Ayuda (Opcional) */}
+      <Dialog.Root open={!!helpContent} onOpenChange={(open) => !open && setHelpContent(null)}>
+        <AnimatePresence>
+          {helpContent && (
+            <Dialog.Portal forceMount>
+              <Dialog.Overlay asChild>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-[80]"
+                />
+              </Dialog.Overlay>
+              <Dialog.Content asChild>
+                <motion.div
+                  initial={{ y: '100%' }}
+                  animate={{ y: 0 }}
+                  exit={{ y: '100%' }}
+                  transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                  className="fixed bottom-0 inset-x-0 z-[90] bg-white rounded-t-[2.5rem] pt-5 pb-10 px-6 shadow-2xl border-t border-slate-100 focus:outline-none max-w-lg mx-auto"
+                >
+                  <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-6" />
+
+                  <div className="flex justify-between items-center mb-4">
+                    <Dialog.Title className="font-disp text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                      💡 Explicación: {helpContent.title}
+                    </Dialog.Title>
+                    <Dialog.Close className="p-2 bg-slate-50 rounded-xl text-slate-400 hover:text-slate-650 transition-colors border border-slate-100 cursor-pointer">
+                      <X size={15} />
+                    </Dialog.Close>
+                  </div>
+
+                  <div className="font-text text-xs text-slate-500 leading-relaxed">
+                    <p>{helpContent.description}</p>
+                  </div>
+                </motion.div>
+              </Dialog.Content>
+            </Dialog.Portal>
+          )}
+        </AnimatePresence>
       </Dialog.Root>
 
     </div>
