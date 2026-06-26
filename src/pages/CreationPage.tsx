@@ -254,7 +254,13 @@ export default function CreationPage() {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <motion.div 
+          key={creationType}
+          initial={{ opacity: 0.35 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+        >
           
           {/* Left Column: Cost Elements */}
           <div className="lg:col-span-7 space-y-8">
@@ -463,12 +469,14 @@ export default function CreationPage() {
 
             {/* INPUT NOMBRE */}
             <section className="flex flex-col gap-2.5">
-               <label className="font-mono text-[9px] uppercase font-bold text-slate-400">Nombre de la Obra / Lote</label>
+               <label className="font-mono text-[9px] uppercase font-bold text-slate-400">
+                 {creationType === 'project' ? 'Nombre de tu proyecto a medida' : 'Nombre de tu producto'}
+               </label>
                <input 
                 type="text" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ej: Mural Calle 10..."
+                placeholder={creationType === 'project' ? 'Ej: Mural Calle 10...' : 'Ej: Camiseta radikal...'}
                 className="w-full bg-white border border-slate-100 p-4.5 rounded-2xl font-disp font-bold text-base outline-none focus:border-[hsl(var(--color-primary))]/40 transition-all placeholder:text-slate-300 text-slate-700 shadow-sm focus:shadow-md"
                />
             </section>
@@ -516,7 +524,7 @@ export default function CreationPage() {
 
           </div>
 
-        </div>
+        </motion.div>
       </main>
 
       {/* --- MODALS (Bottom Sh      {/* 1. Añadir Material */}
