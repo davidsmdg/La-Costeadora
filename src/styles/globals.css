@@ -1,35 +1,50 @@
 @import "tailwindcss";
 
+:root {
+  --color-primary: 264 89% 58%;         /* Púrpura eléctrico – identidad Radikal */
+  --color-primary-hover: 264 89% 50%;
+  --color-secondary: 182 53% 50%;       /* Color complementario (turquesa) */
+  --color-bg: 210 40% 98%;              /* Color de fondo ultra limpio */
+  --color-border: 214 32% 91%;          /* Bordes suaves */
+  --color-foreground: 222 47% 11%;
+  --color-muted: 215 16% 47%;
+}
+
 /* ============================================================
-   LA COSTEADORA – DESIGN SYSTEM TOKENS
-   Neo-Brutalista / Editorial Pop
+   LA COSTEADORA – DESIGN SYSTEM TOKENS (RADIKAL STYLE)
    ============================================================ */
 
 @theme {
   /* --- Tipografías --- */
-  --font-disp: "Space Grotesk", sans-serif;
+  --font-disp: "Plus Jakarta Sans", sans-serif;
   --font-text: "Inter", sans-serif;
   --font-mono: "Martian Mono", monospace;
 
-  /* --- Colores base (FORCED LIGHT MODE) --- */
-  --color-canvas:     #FFFFFF;
-  --color-canvas-alt: #F8F9FA;
-  --color-foreground: #111118;
-  --color-surface:    #F1F1F4;
-  --color-border:     #E2E2E8;
+  /* --- Colores base (Radikal) --- */
+  --color-canvas:     hsl(var(--color-bg));
+  --color-canvas-alt: hsl(var(--color-bg));
+  --color-foreground: hsl(var(--color-foreground));
+  --color-surface:    #FFFFFF;
+  --color-border:     hsl(var(--color-border));
+  --color-muted:      hsl(var(--color-muted));
 
-  /* --- Colores pop (neo-brutalistas) --- */
-  --color-pop-blue:   #2727E6;
-  --color-pop-green:  #00C853;
-  --color-pop-yellow: #FFD600;
-  --color-pop-red:    #FF3D00;
-  --color-pop-pink:   #FF6B9D;
-  --color-pop-orange: #FF6B00;
+  /* --- Colores de marca Radikal --- */
+  --color-primary:    hsl(var(--color-primary));
+  --color-primary-hover: hsl(var(--color-primary-hover));
+  --color-secondary:  hsl(var(--color-secondary));
 
-  /* --- Sombras duras (neo-brutal) --- */
-  --shadow-brutal:    4px 4px 0px #111118;
-  --shadow-brutal-sm: 2px 2px 0px #111118;
-  --shadow-brutal-inv: 4px 4px 0px #FFFFFF;
+  /* --- Colores pop compatibles con el resto de la app --- */
+  --color-pop-blue:   hsl(var(--color-primary));
+  --color-pop-pink:   hsl(var(--color-secondary));
+  --color-pop-green:  hsl(150 100% 38%);
+  --color-pop-yellow: hsl(47 100% 50%);
+  --color-pop-red:    hsl(4 90% 58%);
+  --color-pop-orange: hsl(24 95% 50%);
+
+  /* --- Sombras suaves --- */
+  --shadow-brutal:    0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --shadow-brutal-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-brutal-inv: 0 10px 25px -5px rgba(255, 255, 255, 0.05);
 }
 
 /* ============================================================
@@ -37,6 +52,10 @@
    ============================================================ */
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+/* Reset margins and paddings only on layout/structural elements, NOT on interactive ones */
+html, body, h1, h2, h3, h4, h5, h6, p, ol, ul, li, figure, figcaption, blockquote, dl, dd {
   margin: 0;
   padding: 0;
 }
@@ -54,10 +73,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-/* Hide scrollbars (mobile-strict) */
-::-webkit-scrollbar { display: none; }
-* { scrollbar-width: none; }
 
 /* ============================================================
    TIPOGRAFÍA UTILITARIA
@@ -127,6 +142,7 @@ body {
   to { height: 0; opacity: 0; }
 }
 
+/* Tailwind variant classes */
 .data-\[state\=open\]\:animate-accordion-down {
   animation: accordion-down 300ms cubic-bezier(0.87, 0, 0.13, 1);
 }
@@ -134,18 +150,45 @@ body {
   animation: accordion-up 300ms cubic-bezier(0.87, 0, 0.13, 1);
 }
 
-/* Sombra dura neo-brutal */
-.shadow-brutal    { box-shadow: var(--shadow-brutal); }
-.shadow-brutal-sm { box-shadow: var(--shadow-brutal-sm); }
-.shadow-brutal-inv { box-shadow: var(--shadow-brutal-inv); }
+/* Direct Radix attribute selectors (fallback) */
+[data-state="open"].animate-accordion-down,
+[data-radix-accordion-content][data-state="open"] {
+  animation: accordion-down 300ms cubic-bezier(0.87, 0, 0.13, 1);
+  overflow: hidden;
+}
+[data-state="closed"].animate-accordion-up,
+[data-radix-accordion-content][data-state="closed"] {
+  animation: accordion-up 300ms cubic-bezier(0.87, 0, 0.13, 1);
+  overflow: hidden;
+}
 
-/* Tarjetas "Sticker" con rotaciones predefinidas */
-.sticker-r1  { transform: rotate(1deg); }
-.sticker-r2  { transform: rotate(2deg); }
-.sticker-r3  { transform: rotate(3deg); }
-.sticker-l1  { transform: rotate(-1deg); }
-.sticker-l2  { transform: rotate(-2deg); }
-.sticker-l3  { transform: rotate(-3deg); }
+/* Sombras suaves con transición Premium al hacer Hover */
+.shadow-brutal {
+  box-shadow: var(--shadow-brutal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.shadow-brutal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-brutal-sm {
+  box-shadow: var(--shadow-brutal-sm);
+  transition: all 0.2s ease;
+}
+.shadow-brutal-sm:hover {
+  box-shadow: 0 8px 16px -2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-brutal-inv {
+  box-shadow: var(--shadow-brutal-inv);
+}
+
+/* Tarjetas alineadas y limpias para el estilo Radikal */
+.sticker-r1, .sticker-r2, .sticker-r3,
+.sticker-l1, .sticker-l2, .sticker-l3 {
+  transform: rotate(0deg) !important;
+}
 
 /* Semáforo financiero */
 .margin-healthy  { color: var(--color-pop-green); }
@@ -158,8 +201,8 @@ body {
 
 /* Borde de Autoría (Estrella) */
 .authorship-active {
-  border: 2px solid #F5A623;
-  box-shadow: 0 0 8px rgba(245, 166, 35, 0.5);
+  border: 2px solid hsl(264, 89%, 58%);
+  box-shadow: 0 0 12px rgba(123, 47, 255, 0.3);
 }
 
 /* Rayas diagonales (proyectos pendientes de cobro) */
@@ -167,9 +210,9 @@ body {
   background-image: repeating-linear-gradient(
     -45deg,
     transparent,
-    transparent 4px,
-    rgba(0, 0, 0, 0.1) 4px,
-    rgba(0, 0, 0, 0.1) 8px
+    transparent 6px,
+    rgba(0, 0, 0, 0.03) 6px,
+    rgba(0, 0, 0, 0.03) 12px
   );
 }
 
@@ -177,8 +220,8 @@ body {
 .bottom-sheet-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(17, 17, 24, 0.4);
+  backdrop-filter: blur(12px);
   z-index: 40;
 }
 
@@ -204,28 +247,138 @@ body {
   justify-content: center;
   box-shadow: var(--shadow-brutal);
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.fab:active { transform: scale(0.93); }
+.fab:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 20px 25px -5px rgba(255, 20, 147, 0.2);
+}
+.fab:active { transform: scale(0.95); }
 
 /* Bottom Tab Bar */
 .bottom-nav {
   position: fixed;
-  bottom: 1rem;
+  bottom: 1.5rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 50;
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
   border-radius: 9999px;
-  padding: 0.5rem 1.5rem;
+  padding: 0.5rem 1.25rem;
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
   align-items: center;
-  box-shadow: var(--shadow-brutal);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 }
 
 /* Borde neón al seleccionar (inventario) */
 .ring-pop-green { outline: 2px solid var(--color-pop-green); outline-offset: 2px; }
 .ring-pop-blue  { outline: 2px solid var(--color-pop-blue);  outline-offset: 2px; }
+
+/* ============================================================
+   ESTILOS DE UTILIDAD A MEDIDA & OVERRIDES
+   ============================================================ */
+
+/* Quitar bordes negros pesados y reemplazarlos por bordes suaves */
+.border-black {
+  border-color: var(--color-border) !important;
+}
+.border-2.border-black {
+  border-width: 1px !important;
+  border-color: var(--color-border) !important;
+}
+.border-4.border-black {
+  border-width: 1.5px !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Quitar scrollbars globales y reemplazarlas por utilidades específicas */
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+
+/* ============================================================
+   LAYOUT SAFE ZONES – Garantiza márgenes en toda pantalla
+   ============================================================ */
+
+/* Wrapper de página con márgenes seguros */
+.page-wrapper {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+@media (min-width: 768px) {
+  .page-wrapper {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .page-wrapper {
+    padding-left: 5rem;
+    padding-right: 5rem;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  display: block !important;
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+.custom-scrollbar {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--color-border) transparent !important;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+}
+.scrollbar-hide {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* ============================================================
+   RANGE SLIDER – Estilos del thumb para todos los navegadores
+   ============================================================ */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: hsl(var(--color-primary));
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px hsl(var(--color-primary) / 0.35);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  box-shadow: 0 4px 14px hsl(var(--color-primary) / 0.5);
+  transform: scale(1.1);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: hsl(var(--color-primary));
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px hsl(var(--color-primary) / 0.35);
+}
+input[type="range"]:focus {
+  outline: none;
+}

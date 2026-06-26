@@ -30,10 +30,32 @@ export default function CreationPage() {
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
   const [isLogisticsModalOpen, setIsLogisticsModalOpen] = useState(false);
 
+  // Custom addition state
+  const [activeTab, setActiveTab] = useState<'inventory' | 'custom'>('inventory');
+  const [customName, setCustomName] = useState('');
+  const [customPrice, setCustomPrice] = useState(0);
+  const [customQuantity, setCustomQuantity] = useState(1);
+  const [customIsFixed, setCustomIsFixed] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredInventory = useMemo(() => {
+    return (inventoryItems || []).filter(item =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [inventoryItems, searchTerm]);
+
   // --- 2. NÚCLEO MATEMÁTICO (useMemo) ---
   const math = useMemo(() => {
     const laborTotal = labor.rate * labor.amount;
-    const materialsTotal = materials.reduce((a, b) => a + (b.quantity * b.unitPrice), 0);
+    
+    const isProduct = creationType === 'product';
+    const materialsFixed = materials.filter(m => m.isFixed).reduce((a, b) => a + (b.quantity * b.unitPrice), 0);
+    const materialsVariable = materials.filter(m => !m.isFixed).reduce((a, b) => a + (b.quantity * b.unitPrice), 0);
+    
+    const materialsTotal = isProduct
+      ? materialsVariable + (investment.estimatedUnits > 0 ? materialsFixed / investment.estimatedUnits : 0)
+      : materials.reduce((a, b) => a + (b.quantity * b.unitPrice), 0);
+
     const logisticsTotal = creationType === 'project' ? logistics.reduce((a, b) => a + (b.quantity * b.unitPrice), 0) : 0;
     const investmentPerUnit = creationType === 'product' && investment.estimatedUnits > 0 
       ? investment.total / investment.estimatedUnits 
@@ -61,7 +83,22 @@ export default function CreationPage() {
       unitPrice: invItem.unitCost,
       category: 'production',
       affectedByAuthorship: false,
-      inventoryId: invItem.id // Referencia para restar stock luego
+      inventoryId: invItem.id, // Referencia para restar stock luego
+      isFixed: false
+    };
+    setMaterials([...materials, newItem]);
+    setIsMaterialModalOpen(false);
+  };
+
+  const handleAddCustomMaterial = (cName: string, price: number, qty: number, isFixed: boolean) => {
+    const newItem: CostItem = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: cName,
+      quantity: qty,
+      unitPrice: price,
+      category: 'production',
+      affectedByAuthorship: false,
+      isFixed
     };
     setMaterials([...materials, newItem]);
     setIsMaterialModalOpen(false);
@@ -120,299 +157,479 @@ export default function CreationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col font-text pb-40">
+    <div className="min-h-screen bg-[var(--color-canvas)] text-slate-800 flex flex-col font-text pb-24 w-full">
       
       {/* A. STICKY HEADER (El Semáforo) */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b-4 border-black p-6 flex flex-col gap-4 shadow-xl">
-        <div className="flex justify-between items-center">
-           <button onClick={() => navigate('/dashboard')} className="p-2 bg-surface rounded-full">
-              <ArrowLeft size={20} />
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100 py-5 px-6 md:px-12 shadow-[0_2px_15px_rgba(0,0,0,0.01)]">
+        <div className="max-w-6xl mx-auto flex justify-between items-center w-full">
+           <button onClick={() => navigate('/dashboard')} className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
+              <ArrowLeft size={18} />
            </button>
            <div className="flex flex-col items-center">
-              <span className="font-mono text-[10px] uppercase font-black text-zinc-400">P. Venta</span>
-              <span className="font-mono text-3xl font-black text-black">${sellingPrice.toLocaleString()}</span>
+              <span className="font-mono text-[9px] uppercase font-bold text-slate-400">P. Venta</span>
+              <span className="font-mono text-xl font-black text-slate-800">${sellingPrice.toLocaleString()}</span>
            </div>
-           <div className={`px-4 py-2 rounded-full border-2 border-black shadow-brutal-sm font-mono font-black text-lg ${
-              math.profitMargin > 60 ? 'bg-pop-green' : math.profitMargin > 40 ? 'bg-pop-yellow' : 'bg-pop-red'
+           <div className={`px-3 py-1.5 rounded-full border text-xs font-mono font-black ${
+              math.profitMargin > 60 ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+              math.profitMargin > 40 ? 'bg-amber-50 border-amber-100 text-amber-600' :
+              'bg-rose-50 border-rose-100 text-rose-600'
            }`}>
-              {Math.round(math.profitMargin)}%
-           </div>
-        </div>
-        <div className="flex justify-between items-center px-2">
-           <div className="flex flex-col">
-              <span className="font-mono text-[9px] uppercase font-bold text-zinc-400">Costo Estimado</span>
-              <span className="font-mono text-sm font-bold text-black">${Math.round(math.productCost).toLocaleString()}</span>
-           </div>
-           <div className="text-right">
-              <span className="font-mono text-[9px] uppercase font-bold text-zinc-400">ADN Seleccionado</span>
-              <span className="block font-disp font-black text-xs uppercase italic">
-                {creationType === 'project' ? '🎨 Proyecto' : '📦 Producto'}
-              </span>
+              {Math.round(math.profitMargin)}% Margen
            </div>
         </div>
       </header>
 
-      <main className="flex-1 p-6 flex flex-col gap-10">
-        
-        {/* B. SELECTOR DE ADN (ToggleGroup) */}
-        <section className="flex flex-col gap-4">
-           <label className="font-mono text-[10px] uppercase font-bold text-zinc-400">ADN de la Creación</label>
-           <ToggleGroup.Root 
-            type="single" 
-            value={creationType} 
-            onValueChange={(val) => val && setCreationType(val as any)}
-            className="flex bg-surface p-1 rounded-2xl border-2 border-border"
-           >
-              <ToggleGroup.Item 
-                value="project" 
-                className={`flex-1 py-4 rounded-xl font-disp font-black uppercase text-sm transition-all ${creationType === 'project' ? 'bg-white border-2 border-black shadow-brutal-sm text-black' : 'text-zinc-400'}`}
-              >
-                🎨 Proyecto
-              </ToggleGroup.Item>
-              <ToggleGroup.Item 
-                value="product" 
-                className={`flex-1 py-4 rounded-xl font-disp font-black uppercase text-sm transition-all ${creationType === 'product' ? 'bg-white border-2 border-black shadow-brutal-sm text-black' : 'text-zinc-400'}`}
-              >
-                📦 Producto
-              </ToggleGroup.Item>
-           </ToggleGroup.Root>
-        </section>
-
-        {/* INPUT NOMBRE */}
-        <section className="flex flex-col gap-2">
-           <label className="font-mono text-[10px] uppercase font-bold text-zinc-400">Nombre de la Obra / Lote</label>
-           <input 
-            type="text" 
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Ej: Mural Calle 10..."
-            className="w-full bg-surface border-2 border-black p-5 rounded-[24px] font-disp font-bold text-2xl outline-none focus:ring-4 ring-pop-blue/10 transition-all placeholder:text-zinc-300"
-           />
-        </section>
-
-        {/* C. LIENZO DE COSTOS */}
-        
-        {/* 1. Mano de Obra */}
-        <section className="space-y-4">
-           <div className="flex items-center gap-2">
-              <Briefcase size={18} className="text-pop-blue" />
-              <h2 className="font-disp font-black uppercase text-sm tracking-widest text-zinc-400">Mano de Obra</h2>
-           </div>
-           <div className="bg-surface p-6 rounded-[32px] border-2 border-border flex flex-col gap-6">
-              <div className="flex justify-between items-center">
-                 <div className="flex bg-white border-2 border-black rounded-lg overflow-hidden text-[10px] font-mono font-bold">
-                    <button onClick={() => setLabor({...labor, type: 'hour'})} className={`px-4 py-2 ${labor.type === 'hour' ? 'bg-black text-white' : ''}`}>X HORA</button>
-                    <button onClick={() => setLabor({...labor, type: 'day'})} className={`px-4 py-2 ${labor.type === 'day' ? 'bg-black text-white' : ''}`}>X DÍA</button>
-                 </div>
-                 <div className="text-right">
-                    <span className="font-mono text-xl font-black text-black">${math.laborTotal.toLocaleString()}</span>
-                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                 <div className="space-y-2">
-                    <span className="font-mono text-[8px] uppercase font-bold text-zinc-400">Tu Tarifa</span>
-                    <input 
-                      type="number"
-                      value={labor.rate || ''}
-                      onChange={(e) => setLabor({...labor, rate: Number(e.target.value)})}
-                      className="w-full bg-transparent border-b-2 border-black font-mono font-black text-2xl outline-none"
-                    />
-                 </div>
-                 <div className="space-y-2">
-                    <span className="font-mono text-[8px] uppercase font-bold text-zinc-400">Cant. ({labor.type})</span>
-                    <input 
-                      type="number"
-                      value={labor.amount || ''}
-                      onChange={(e) => setLabor({...labor, amount: Number(e.target.value)})}
-                      className="w-full bg-transparent border-b-2 border-black font-mono font-black text-2xl outline-none"
-                    />
-                 </div>
-              </div>
-           </div>
-        </section>
-
-        {/* 2. Materiales */}
-        <section className="space-y-4">
-           <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                 <Package size={18} className="text-pop-green" />
-                  <h2 className="font-disp font-black uppercase text-sm tracking-widest text-zinc-400">Control de Insumos</h2>
-              </div>
-           </div>
-           
-           <div className="flex flex-col gap-3">
-              <AnimatePresence>
-                {materials.map((mat) => (
-                  <motion.div 
-                    key={mat.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className={`bg-white p-5 rounded-2xl border-2 transition-all flex justify-between items-center ${mat.affectedByAuthorship ? 'ring-2 ring-pop-yellow border-pop-yellow shadow-lg' : 'border-border'}`}
-                  >
-                     <div className="flex items-center gap-4">
-                        <Switch.Root 
-                          checked={mat.affectedByAuthorship} 
-                          onCheckedChange={() => toggleAuthorship(mat.id)}
-                          className="w-10 h-6 bg-zinc-100 rounded-full relative data-[state=checked]:bg-pop-yellow transition-colors border border-zinc-200"
-                        >
-                           <Switch.Thumb className="block w-4 h-4 bg-white rounded-full translate-x-1 transition-transform data-[state=checked]:translate-x-5 shadow-sm" />
-                           <Star size={10} className="absolute top-1.5 left-1.5 text-zinc-300 pointer-events-none" />
-                        </Switch.Root>
-                        <div className="flex flex-col">
-                           <span className="font-disp font-black text-xs uppercase italic text-black">{mat.name}</span>
-                            <span className="font-mono text-[10px] text-zinc-400">{mat.quantity} unidades</span>
-                        </div>
+      <main className="flex-1 max-w-6xl mx-auto px-6 md:px-12 py-8 w-full flex flex-col gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column: Cost Elements */}
+          <div className="lg:col-span-7 space-y-8">
+            
+            {/* 1. Mano de Obra */}
+            <section className="space-y-3.5">
+               <div className="flex items-center gap-1.5">
+                  <Briefcase size={15} className="text-[hsl(var(--color-primary))]" />
+                  <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Mano de Obra</h2>
+               </div>
+               <div className="bg-white p-6 rounded-3xl border border-slate-100 flex flex-col gap-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
+                  <div className="flex justify-between items-center">
+                     <div className="flex bg-slate-50 border border-slate-100 rounded-lg overflow-hidden text-[9px] font-mono font-bold">
+                        <button onClick={() => setLabor({...labor, type: 'hour'})} className={`px-3 py-1.5 cursor-pointer ${labor.type === 'hour' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-100'}`}>X HORA</button>
+                        <button onClick={() => setLabor({...labor, type: 'day'})} className={`px-3 py-1.5 cursor-pointer ${labor.type === 'day' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-100'}`}>X DÍA</button>
                      </div>
-                     <button onClick={() => removeMaterial(mat.id)} className="text-zinc-200 hover:text-pop-red transition-colors">
-                        <Trash2 size={18} />
-                     </button>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              {materials.length === 0 && (
-                <div className="py-10 text-center border-2 border-dashed border-zinc-100 rounded-3xl text-zinc-300 font-mono text-xs italic">
-                  No has añadido insumos.
-                </div>
-              )}
-              <button 
-                onClick={() => setIsMaterialModalOpen(true)}
-                className="w-full py-5 border-2 border-dashed border-black rounded-2xl text-black font-disp font-black uppercase text-xs flex items-center justify-center gap-2 hover:bg-surface transition-all"
-              >
-                  <Plus size={16} /> Añadir Insumo
-               </button>
-           </div>
-        </section>
-
-        {/* 3. Logística (Condicional) */}
-        {creationType === 'project' && (
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-               <div className="flex items-center gap-2">
-                  <Truck size={18} className="text-pop-orange" />
-                  <h2 className="font-disp font-black uppercase text-sm tracking-widest text-zinc-400">Logística y Viáticos</h2>
+                     <div className="text-right">
+                        <span className="font-mono text-base font-black text-slate-700">${math.laborTotal.toLocaleString()}</span>
+                     </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                     <div className="space-y-1.5">
+                        <span className="font-mono text-[8px] uppercase font-bold text-slate-400">Tu Tarifa</span>
+                        <input 
+                          type="number"
+                          value={labor.rate || ''}
+                          onChange={(e) => setLabor({...labor, rate: Number(e.target.value)})}
+                          className="w-full bg-transparent border-b border-slate-200 focus:border-[hsl(var(--color-primary))] font-mono font-black text-lg text-slate-700 outline-none pb-1"
+                        />
+                     </div>
+                     <div className="space-y-1.5">
+                        <span className="font-mono text-[8px] uppercase font-bold text-slate-400">Cant. ({labor.type})</span>
+                        <input 
+                          type="number"
+                          value={labor.amount || ''}
+                          onChange={(e) => setLabor({...labor, amount: Number(e.target.value)})}
+                          className="w-full bg-transparent border-b border-slate-200 focus:border-[hsl(var(--color-primary))] font-mono font-black text-lg text-slate-700 outline-none pb-1"
+                        />
+                     </div>
+                  </div>
                </div>
-               <span className="font-mono text-xs font-bold text-zinc-400">${math.logisticsTotal.toLocaleString()}</span>
-            </div>
-            <div className="flex flex-col gap-3">
-               {logistics.map((log) => (
-                 <div key={log.id} className="bg-surface p-4 rounded-xl flex justify-between items-center border border-border">
-                    <div className="flex flex-col">
-                       <span className="font-disp font-bold text-xs uppercase text-black">{log.name}</span>
-                       <span className="font-mono text-[10px] text-zinc-400">${log.unitPrice.toLocaleString()}</span>
+            </section>
+
+            {/* 2. Costos de Creación */}
+            <section className="space-y-3.5">
+               <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                     <Package size={15} className="text-[hsl(var(--color-secondary))]" />
+                      <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Costos de Creación</h2>
+                  </div>
+               </div>
+               
+               <div className="flex flex-col gap-2.5">
+                  <AnimatePresence>
+                    {materials.map((mat) => (
+                      <motion.div 
+                        key={mat.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className={`bg-white p-4.5 rounded-2xl border transition-all flex justify-between items-center ${
+                          mat.affectedByAuthorship 
+                            ? 'border-[hsl(var(--color-primary))]/20 shadow-[0_4px_12px_rgba(255,20,147,0.02)]' 
+                            : 'border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.015)]'
+                        }`}
+                      >
+                         <div className="flex items-center gap-4">
+                            <Switch.Root 
+                              checked={mat.affectedByAuthorship} 
+                              onCheckedChange={() => toggleAuthorship(mat.id)}
+                              className="w-8 h-5 bg-slate-100 rounded-full relative data-[state=checked]:bg-amber-400 transition-colors border border-slate-200 cursor-pointer"
+                            >
+                               <Switch.Thumb className="block w-3.5 h-3.5 bg-white rounded-full translate-x-0.5 transition-transform data-[state=checked]:translate-x-3.5 shadow-sm" />
+                               <Star size={8} className="absolute top-1.5 left-1 text-slate-300 pointer-events-none" />
+                            </Switch.Root>
+                            <div className="flex flex-col gap-0.5">
+                               <span className="font-disp font-bold text-xs uppercase text-slate-800">{mat.name}</span>
+                               <div className="flex items-center gap-2 mt-0.5">
+                                 <span className="font-mono text-[9px] font-bold text-slate-400">{mat.quantity} unidades x ${mat.unitPrice.toLocaleString()}</span>
+                                 {creationType === 'product' && (
+                                   <button
+                                     type="button"
+                                     onClick={() => {
+                                       setMaterials(materials.map(m => m.id === mat.id ? { ...m, isFixed: !m.isFixed } : m));
+                                     }}
+                                     className={`px-1.5 py-0.5 rounded text-[8px] font-mono font-bold uppercase transition-all ${
+                                       mat.isFixed 
+                                         ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' 
+                                         : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                     }`}
+                                   >
+                                     {mat.isFixed ? 'Fijo' : 'Variable'}
+                                   </button>
+                                 )}
+                               </div>
+                            </div>
+                         </div>
+                         <button onClick={() => removeMaterial(mat.id)} className="text-slate-300 hover:text-rose-500 transition-colors cursor-pointer">
+                            <Trash2 size={16} />
+                         </button>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  {materials.length === 0 && (
+                    <div className="py-8 text-center border border-dashed border-slate-200 bg-slate-50/50 rounded-2xl text-slate-400 font-text text-[10px]">
+                      No has añadido costos de creación.
                     </div>
-                    <button onClick={() => removeLogistics(log.id)} className="text-zinc-300"><Trash2 size={16}/></button>
-                 </div>
-               ))}
-               <button 
-                 onClick={() => setIsLogisticsModalOpen(true)}
-                 className="w-full py-4 bg-surface border-2 border-black rounded-2xl text-black font-mono font-bold text-[10px] uppercase flex items-center justify-center gap-2"
+                  )}
+                  <button 
+                    onClick={() => setIsMaterialModalOpen(true)}
+                    className="w-full py-3.5 border border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 rounded-2xl text-slate-500 font-disp text-xs font-bold flex items-center justify-center gap-2 hover:border-slate-300 transition-all cursor-pointer"
+                  >
+                      <Plus size={14} /> Añadir Costo
+                   </button>
+               </div>
+            </section>
+
+            {/* 3. Logística (Condicional) */}
+            {creationType === 'project' && (
+              <section className="space-y-3.5">
+                <div className="flex items-center justify-between">
+                   <div className="flex items-center gap-1.5">
+                      <Truck size={15} className="text-amber-500" />
+                      <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Logística y Viáticos</h2>
+                   </div>
+                   <span className="font-mono text-xs font-bold text-slate-500">${math.logisticsTotal.toLocaleString()}</span>
+                </div>
+                <div className="flex flex-col gap-2.5">
+                   {logistics.map((log) => (
+                     <div key={log.id} className="bg-white p-4 rounded-xl flex justify-between items-center border border-slate-100 shadow-[0_4px_10px_rgba(0,0,0,0.015)]">
+                        <div className="flex flex-col gap-0.5">
+                           <span className="font-disp font-bold text-xs uppercase text-slate-800">{log.name}</span>
+                           <span className="font-mono text-[9px] font-bold text-slate-400">${log.unitPrice.toLocaleString()}</span>
+                        </div>
+                        <button onClick={() => removeLogistics(log.id)} className="text-slate-300 hover:text-rose-500 cursor-pointer"><Trash2 size={14}/></button>
+                     </div>
+                   ))}
+                   <button 
+                     onClick={() => setIsLogisticsModalOpen(true)}
+                     className="w-full py-3.5 border border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 rounded-2xl text-slate-500 font-disp text-xs font-bold flex items-center justify-center gap-2 hover:border-slate-300 transition-all cursor-pointer"
+                   >
+                      <Plus size={14} /> Añadir Gasto
+                   </button>
+                </div>
+              </section>
+            )}
+
+            {/* 4. Inversión y Lote (Condicional) */}
+            {creationType === 'product' && (
+              <section className="space-y-3.5">
+                <div className="flex items-center gap-1.5">
+                   <Construction size={15} className="text-[hsl(var(--color-primary))]" />
+                   <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Inversión y Lote</h2>
+                </div>
+                <div className="bg-slate-900 p-6 rounded-[2rem] text-white shadow-md space-y-6">
+                   <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                         <label className="font-mono text-[8px] uppercase font-bold text-white/50">Inversión Total</label>
+                         <input 
+                           type="number"
+                           value={investment.total || ''}
+                           onChange={(e) => setInvestment({...investment, total: Number(e.target.value)})}
+                           className="w-full bg-white/5 border-b border-white/20 focus:border-white/50 font-mono font-black text-lg outline-none pb-1"
+                         />
+                      </div>
+                      <div className="space-y-1.5">
+                         <label className="font-mono text-[8px] uppercase font-bold text-white/50">Lote (Unidades)</label>
+                         <input 
+                           type="number"
+                           value={investment.estimatedUnits || ''}
+                           onChange={(e) => setInvestment({...investment, estimatedUnits: Number(e.target.value)})}
+                           className="w-full bg-white/5 border-b border-white/20 focus:border-white/50 font-mono font-black text-lg outline-none pb-1"
+                         />
+                      </div>
+                   </div>
+                   <div className="pt-4 border-t border-white/10 flex justify-between items-center font-mono text-[10px]">
+                      <span className="opacity-50">Impacto x Unidad:</span>
+                      <span className="font-black text-sm">${Math.round(math.investmentPerUnit).toLocaleString()}</span>
+                   </div>
+                </div>
+              </section>
+            )}
+
+          </div>
+
+          {/* Right Column: Config and Pricing */}
+          <div className="lg:col-span-5 space-y-8 lg:sticky lg:top-40">
+            
+            {/* B. SELECTOR DE ADN (ToggleGroup) */}
+            <section className="flex flex-col gap-2.5">
+               <label className="font-mono text-[9px] uppercase font-bold text-slate-400">ADN de la Creación</label>
+               <ToggleGroup.Root 
+                type="single" 
+                value={creationType} 
+                onValueChange={(val) => val && setCreationType(val as any)}
+                className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100"
                >
-                  <Plus size={14} /> Añadir Gasto
+                  <ToggleGroup.Item 
+                    value="project" 
+                    className={`flex-1 py-3 rounded-xl font-disp font-bold text-xs transition-all cursor-pointer ${
+                      creationType === 'project' 
+                        ? 'bg-white text-slate-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] border border-slate-100/50' 
+                        : 'text-slate-400 hover:text-slate-650'
+                    }`}
+                  >
+                    🎨 Proyecto
+                  </ToggleGroup.Item>
+                  <ToggleGroup.Item 
+                    value="product" 
+                    className={`flex-1 py-3 rounded-xl font-disp font-bold text-xs transition-all cursor-pointer ${
+                      creationType === 'product' 
+                        ? 'bg-white text-slate-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] border border-slate-100/50' 
+                        : 'text-slate-400 hover:text-slate-650'
+                    }`}
+                  >
+                    📦 Producto
+                  </ToggleGroup.Item>
+               </ToggleGroup.Root>
+            </section>
+
+            {/* INPUT NOMBRE */}
+            <section className="flex flex-col gap-2.5">
+               <label className="font-mono text-[9px] uppercase font-bold text-slate-400">Nombre de la Obra / Lote</label>
+               <input 
+                type="text" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Ej: Mural Calle 10..."
+                className="w-full bg-white border border-slate-100 p-4.5 rounded-2xl font-disp font-bold text-base outline-none focus:border-[hsl(var(--color-primary))]/40 transition-all placeholder:text-slate-300 text-slate-700 shadow-sm focus:shadow-md"
+               />
+            </section>
+
+            {/* D. PRICING Y GUARDADO */}
+            <section className="bg-white border border-slate-100 rounded-3xl p-6.5 shadow-[0_4px_20px_rgba(0,0,0,0.015)] space-y-6">
+               <div className="space-y-4">
+                  <div className="flex justify-between items-center gap-4">
+                     <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Fijar Precio Final</h2>
+                     <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-3 py-2 rounded-xl focus-within:border-[hsl(var(--color-primary))]/50 transition-colors">
+                        <span className="font-mono text-xs text-slate-400 font-bold">$</span>
+                        <input
+                          type="number"
+                          value={sellingPrice || ''}
+                          onChange={(e) => setSellingPrice(parseFloat(e.target.value) || 0)}
+                          className="w-28 bg-transparent text-right font-mono text-base font-black text-slate-700 focus:outline-none"
+                        />
+                        <span className="font-mono text-[9px] text-slate-400 font-bold uppercase">COP</span>
+                     </div>
+                  </div>
+                  <Slider.Root
+                    className="relative flex items-center select-none touch-none w-full h-8"
+                    value={[sellingPrice]}
+                    max={Math.max(math.productCost * 5, 2000000)}
+                    step={1}
+                    onValueChange={([val]) => setSellingPrice(val)}
+                  >
+                    <Slider.Track className="bg-slate-100 relative grow rounded-full h-2.5">
+                      <Slider.Range className={`absolute h-full rounded-full ${
+                        math.profitMargin > 60 ? 'bg-emerald-400' : math.profitMargin > 40 ? 'bg-amber-400' : 'bg-rose-400'
+                      }`} />
+                    </Slider.Track>
+                    <Slider.Thumb className="block w-5.5 h-5.5 bg-white border border-slate-200 rounded-full shadow-md focus:outline-none hover:scale-105 transition-transform cursor-pointer" />
+                  </Slider.Root>
+               </div>
+
+               <button 
+                 onClick={handleSave}
+                 disabled={sellingPrice === 0 || !name}
+                 className="w-full bg-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-primary-hover))] text-white font-disp font-bold text-xs uppercase tracking-wider py-4.5 rounded-full shadow-[0_6px_20px_rgba(255,20,147,0.18)] hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+               >
+                  <Save size={16} /> Guardar Creación
                </button>
-            </div>
-          </section>
-        )}
+            </section>
 
-        {/* 4. Inversión y Lote (Condicional) */}
-        {creationType === 'product' && (
-          <section className="space-y-4">
-            <div className="flex items-center gap-2">
-               <Construction size={18} className="text-pop-pink" />
-               <h2 className="font-disp font-black uppercase text-sm tracking-widest text-zinc-400">Inversión y Lote</h2>
-            </div>
-            <div className="bg-pop-blue p-8 rounded-[40px] text-white shadow-brutal space-y-8">
-               <div className="grid grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                     <label className="font-mono text-[8px] uppercase font-bold text-white/50">Inversión Total</label>
-                     <input 
-                       type="number"
-                       value={investment.total || ''}
-                       onChange={(e) => setInvestment({...investment, total: Number(e.target.value)})}
-                       className="w-full bg-white/10 border-b-2 border-white font-mono font-black text-2xl outline-none"
-                     />
-                  </div>
-                  <div className="space-y-2">
-                     <label className="font-mono text-[8px] uppercase font-bold text-white/50">Lote (Unidades)</label>
-                     <input 
-                       type="number"
-                       value={investment.estimatedUnits || ''}
-                       onChange={(e) => setInvestment({...investment, estimatedUnits: Number(e.target.value)})}
-                       className="w-full bg-white/10 border-b-2 border-white font-mono font-black text-2xl outline-none"
-                     />
-                  </div>
-               </div>
-               <div className="pt-4 border-t border-white/20 flex justify-between items-center font-mono text-xs">
-                  <span className="opacity-50">Impacto x Unidad:</span>
-                  <span className="font-black text-lg">${Math.round(math.investmentPerUnit).toLocaleString()}</span>
-               </div>
-            </div>
-          </section>
-        )}
+          </div>
 
-        {/* D. PRICING Y GUARDADO (Footer) */}
-        <section className="mt-10 space-y-10">
-           <div className="space-y-6">
-              <div className="flex justify-between items-end">
-                 <h2 className="font-disp font-black uppercase text-sm tracking-widest text-zinc-400">Fijar Precio Final</h2>
-                 <span className="font-mono text-3xl font-black text-pop-green">${sellingPrice.toLocaleString()}</span>
-              </div>
-              <Slider.Root
-                className="relative flex items-center select-none touch-none w-full h-10"
-                value={[sellingPrice]}
-                max={math.productCost * 5}
-                step={1}
-                onValueChange={([val]) => setSellingPrice(val)}
-              >
-                <Slider.Track className="bg-zinc-100 relative grow rounded-full h-4 border-2 border-black">
-                  <Slider.Range className={`absolute h-full rounded-full ${
-                    math.profitMargin > 60 ? 'bg-pop-green' : math.profitMargin > 40 ? 'bg-pop-yellow' : 'bg-pop-red'
-                  }`} />
-                </Slider.Track>
-                <Slider.Thumb className="block w-10 h-10 bg-white border-4 border-black rounded-full shadow-brutal-sm focus:outline-none hover:scale-110 transition-transform cursor-grab active:cursor-grabbing" />
-              </Slider.Root>
-           </div>
-
-           <button 
-             onClick={handleSave}
-             disabled={sellingPrice === 0 || !name}
-             className="w-full bg-pop-blue text-white py-8 rounded-[32px] font-disp text-2xl font-black uppercase italic shadow-brutal hover:-translate-y-1 active:translate-y-1 transition-all flex items-center justify-center gap-4 disabled:opacity-30 disabled:translate-y-0"
-           >
-              <Save size={28} /> Guardar Creación
-           </button>
-        </section>
-
+        </div>
       </main>
 
-      {/* --- MODALS (Bottom Sheets) --- */}
-      
-      {/* 1. Añadir Material */}
-      <Dialog.Root open={isMaterialModalOpen} onOpenChange={setIsMaterialModalOpen}>
+      {/* --- MODALS (Bottom Sh      {/* 1. Añadir Material */}
+      <Dialog.Root open={isMaterialModalOpen} onOpenChange={(open) => {
+        setIsMaterialModalOpen(open);
+        if (!open) {
+          setCustomName('');
+          setCustomPrice(0);
+          setCustomQuantity(1);
+          setCustomIsFixed(false);
+          setSearchTerm('');
+        }
+      }}>
         <Dialog.Portal>
-           <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]" />
-           <Dialog.Content className="fixed bottom-0 inset-x-0 bg-white rounded-t-[40px] p-8 pb-12 z-[70] shadow-2xl flex flex-col gap-8 max-w-lg mx-auto border-x border-zinc-100">
-              <div className="flex justify-between items-center">
-                 <Dialog.Title className="font-disp text-2xl font-black uppercase italic text-black">Añadir del Cofre</Dialog.Title>
-                 <Dialog.Close className="p-2 bg-surface rounded-full text-zinc-400"><X /></Dialog.Close>
+           <Dialog.Overlay className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[60]" />
+           <Dialog.Content className="fixed bottom-0 inset-x-0 bg-white rounded-t-[2.5rem] p-6 pb-12 z-[70] shadow-2xl flex flex-col gap-6 max-w-lg mx-auto border-t border-slate-100 focus:outline-none max-h-[85vh] overflow-y-auto">
+              <div className="flex justify-between items-start">
+                 <div>
+                   <Dialog.Title className="font-disp text-lg font-extrabold text-slate-800 uppercase tracking-tight">Costos de Creación</Dialog.Title>
+                   <Dialog.Description className="font-text text-xs text-slate-400">
+                      Agrega insumos de tu cofre o registra un costo personalizado.
+                   </Dialog.Description>
+                 </div>
+                 <Dialog.Close className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-650 transition-colors border border-slate-100 cursor-pointer"><X size={15} /></Dialog.Close>
               </div>
 
-              <div className="flex flex-col gap-4 overflow-y-auto max-h-[60vh] pr-2">
-                 {inventoryItems.map(item => (
-                   <button 
-                    key={item.id}
-                    onClick={() => handleAddMaterial(item, 1)}
-                    className="flex items-center justify-between p-4 bg-surface rounded-2xl border-2 border-border hover:border-black transition-all group"
-                   >
-                      <div className="flex flex-col text-left">
-                         <span className="font-disp font-bold text-sm uppercase text-black">{item.name}</span>
-                          <span className="font-mono text-[10px] text-zinc-400">Stock: {item.totalQuantity} {item.unit}</span>
-                      </div>
-                      <div className="w-10 h-10 bg-white border-2 border-border rounded-full flex items-center justify-center group-hover:border-black transition-all">
-                         <Plus size={18} />
-                      </div>
-                   </button>
-                 ))}
+              {/* Tabs selector */}
+              <div className="flex border-b border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('inventory')}
+                  className={`flex-1 pb-3 font-disp text-xs font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
+                    activeTab === 'inventory'
+                      ? 'border-b-2 border-[hsl(var(--color-primary))] text-[hsl(var(--color-primary))]'
+                      : 'text-slate-400 hover:text-slate-605'
+                  }`}
+                >
+                  Del Cofre ({filteredInventory.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('custom')}
+                  className={`flex-1 pb-3 font-disp text-xs font-bold uppercase tracking-wider text-center cursor-pointer transition-colors ${
+                    activeTab === 'custom'
+                      ? 'border-b-2 border-[hsl(var(--color-primary))] text-[hsl(var(--color-primary))]'
+                      : 'text-slate-400 hover:text-slate-605'
+                  }`}
+                >
+                  Personalizado
+                </button>
               </div>
+
+              {/* Tab: Del Cofre */}
+              {activeTab === 'inventory' && (
+                <div className="flex flex-col gap-3 min-h-[200px]">
+                   <div className="relative">
+                     <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                     <input
+                       type="text"
+                       placeholder="Buscar en el cofre..."
+                       value={searchTerm}
+                       onChange={(e) => setSearchTerm(e.target.value)}
+                       className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-xs font-text text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[hsl(var(--color-primary))] focus:bg-white transition-all"
+                     />
+                   </div>
+                   <div className="flex flex-col gap-2 overflow-y-auto max-h-[350px] pr-1">
+                     {filteredInventory.length === 0 ? (
+                       <div className="text-center py-10 text-xs text-slate-400">
+                         No hay insumos disponibles.
+                       </div>
+                     ) : (
+                       filteredInventory.map(item => (
+                         <button 
+                          key={item.id}
+                          onClick={() => handleAddMaterial(item, 1)}
+                          className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-all text-slate-700 cursor-pointer text-left font-text"
+                         >
+                            <div className="flex flex-col gap-0.5">
+                               <span className="font-disp font-bold text-xs uppercase text-slate-800">{item.name}</span>
+                               <span className="font-mono text-[9px] text-slate-400 font-bold">Stock: {item.totalQuantity} {item.unit} · Costo: ${item.unitCost.toLocaleString()}</span>
+                            </div>
+                            <div className="w-8 h-8 bg-white border border-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-650 transition-all">
+                               <Plus size={14} />
+                            </div>
+                         </button>
+                       ))
+                     )}
+                   </div>
+                </div>
+              )}
+
+              {/* Tab: Personalizado */}
+              {activeTab === 'custom' && (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="font-mono text-[9px] uppercase tracking-widest text-slate-400 font-bold block">
+                      Nombre del Costo
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej. Diseño de troquel, Embalaje especial..."
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-xs font-text text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[hsl(var(--color-primary))] focus:bg-white transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="font-mono text-[9px] uppercase tracking-widest text-slate-400 font-bold block">
+                        Cantidad
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        placeholder="1"
+                        value={customQuantity === 0 ? '' : customQuantity}
+                        onChange={(e) => setCustomQuantity(parseFloat(e.target.value) || 0)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-xs font-text text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[hsl(var(--color-primary))] focus:bg-white transition-all"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="font-mono text-[9px] uppercase tracking-widest text-slate-400 font-bold block">
+                        Costo Unitario / Total
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        placeholder="0"
+                        value={customPrice === 0 ? '' : customPrice}
+                        onChange={(e) => setCustomPrice(parseFloat(e.target.value) || 0)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-xs font-text text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[hsl(var(--color-primary))] focus:bg-white transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {creationType === 'product' && (
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-disp font-bold text-xs uppercase text-slate-800">Costo Fijo de Lote</span>
+                        <span className="font-text text-[10px] text-slate-400 leading-normal">
+                          Se amortiza dividiéndose entre todas las unidades estimadas del lote.
+                        </span>
+                      </div>
+                      <Switch.Root 
+                        checked={customIsFixed} 
+                        onCheckedChange={setCustomIsFixed}
+                        className="w-8 h-5 bg-slate-100 rounded-full relative data-[state=checked]:bg-[hsl(var(--color-primary))] transition-colors border border-slate-200 cursor-pointer"
+                      >
+                         <Switch.Thumb className="block w-3.5 h-3.5 bg-white rounded-full translate-x-0.5 transition-transform data-[state=checked]:translate-x-3.5 shadow-sm" />
+                      </Switch.Root>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!customName.trim()) return;
+                      handleAddCustomMaterial(customName.trim(), customPrice, customQuantity, customIsFixed);
+                      setCustomName('');
+                      setCustomPrice(0);
+                      setCustomQuantity(1);
+                      setCustomIsFixed(false);
+                    }}
+                    disabled={!customName.trim()}
+                    className="w-full py-3.5 bg-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-primary-hover))] disabled:opacity-40 disabled:pointer-events-none text-white font-disp font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center mt-4"
+                  >
+                    Agregar Costo
+                  </button>
+                </div>
+              )}
            </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
@@ -420,13 +637,13 @@ export default function CreationPage() {
       {/* 2. Añadir Logística */}
       <Dialog.Root open={isLogisticsModalOpen} onOpenChange={setIsLogisticsModalOpen}>
         <Dialog.Portal>
-           <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]" />
-           <Dialog.Content className="fixed bottom-0 inset-x-0 bg-white rounded-t-[40px] p-8 pb-12 z-[70] shadow-2xl flex flex-col gap-8 max-w-lg mx-auto border-x border-zinc-100">
+           <Dialog.Overlay className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[60]" />
+           <Dialog.Content className="fixed bottom-0 inset-x-0 bg-white rounded-t-[2.5rem] p-6 pb-12 z-[70] shadow-2xl flex flex-col gap-6 max-w-lg mx-auto border-t border-slate-100 focus:outline-none">
               <div className="flex justify-between items-center">
-                 <Dialog.Title className="font-disp text-2xl font-black uppercase italic text-black">Logística y Viáticos</Dialog.Title>
-                 <Dialog.Close className="p-2 bg-surface rounded-full text-zinc-400"><X /></Dialog.Close>
+                 <Dialog.Title className="font-disp text-lg font-extrabold text-slate-800">Logística y Viáticos</Dialog.Title>
+                 <Dialog.Close className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-600 transition-colors border border-slate-100 cursor-pointer"><X size={15} /></Dialog.Close>
               </div>
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-3">
                  {[
                    { name: 'Taxi / Transporte', price: 15 },
                    { name: 'Almuerzo Trabajo', price: 10 },
@@ -436,10 +653,10 @@ export default function CreationPage() {
                    <button 
                     key={opt.name}
                     onClick={() => handleAddLogistics(opt)}
-                    className="flex justify-between items-center p-5 bg-surface border-2 border-border rounded-2xl font-disp font-black uppercase text-sm"
+                    className="flex justify-between items-center p-4 bg-slate-50/50 hover:bg-slate-50 border border-slate-100 rounded-2xl font-disp font-bold text-xs text-slate-700 cursor-pointer"
                    >
                       {opt.name}
-                      <span className="font-mono text-pop-orange">${opt.price}</span>
+                      <span className="font-mono text-[hsl(var(--color-primary))] font-bold">${opt.price}</span>
                    </button>
                  ))}
               </div>

@@ -100,23 +100,23 @@ export default function CreationWizard() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black flex flex-col font-text overflow-x-hidden relative pb-32">
+    <div className="min-h-screen bg-[var(--color-canvas)] text-slate-800 flex flex-col font-text overflow-x-hidden relative pb-32 max-w-lg mx-auto border-x border-slate-100">
       
       {/* 1. STICKY HEADER (Check de Salud) */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b-4 border-black p-6 flex items-center justify-between shadow-xl">
-         <button onClick={() => navigate('/dashboard')} className="p-2 bg-surface rounded-full">
-            <X size={20} />
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100 p-6 flex items-center justify-between shadow-[0_2px_15px_rgba(0,0,0,0.01)]">
+         <button onClick={() => navigate('/dashboard')} className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
+            <X size={16} />
          </button>
          
          <div className="flex flex-col items-center">
-            <span className="font-mono text-[10px] uppercase font-black text-zinc-400">Costo Total Est.</span>
-            <span className="font-mono text-xl font-black text-black">${Math.round(productCost).toLocaleString()}</span>
+            <span className="font-mono text-[9px] uppercase font-bold text-slate-400">Costo Total Est.</span>
+            <span className="font-mono text-sm font-bold text-slate-600">${Math.round(productCost).toLocaleString()}</span>
          </div>
 
          <div className="flex flex-col items-end">
-            <span className="font-mono text-[10px] uppercase font-black text-zinc-400">Margen</span>
-            <span className={`font-mono text-xl font-black ${
-              profitMargin > 60 ? 'text-pop-green' : profitMargin > 40 ? 'text-pop-yellow' : 'text-pop-red'
+            <span className="font-mono text-[9px] uppercase font-bold text-slate-400">Margen</span>
+            <span className={`font-mono text-sm font-bold ${
+              profitMargin > 60 ? 'text-emerald-500' : profitMargin > 40 ? 'text-amber-500' : 'text-rose-500'
             }`}>
               {Math.round(profitMargin)}%
             </span>
@@ -133,45 +133,41 @@ export default function CreationWizard() {
               initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
-              className="flex flex-col gap-10 py-8"
+              className="flex flex-col gap-8 py-4"
             >
-              <div className="space-y-2">
-                <h2 className="font-disp text-4xl font-black uppercase italic leading-tight">
-                  ¿Qué estás <br/> <span className="text-pop-blue underline">creando</span> hoy?
+              <div className="space-y-1.5">
+                <h2 className="font-disp text-3xl font-black uppercase italic leading-tight text-slate-850">
+                  ¿Qué estás <br/> <span className="text-[hsl(var(--color-primary))]">creando</span> hoy?
                 </h2>
-                <p className="font-text text-zinc-500">Elige la lógica de tu nuevo proyecto.</p>
+                <p className="font-text text-xs text-slate-400">Elige la lógica de tu nuevo proyecto.</p>
               </div>
 
-              <div className="flex flex-col gap-6">
-                <motion.button
-                  whileHover={{ scale: 1.02, rotate: -1 }}
-                  whileTap={{ scale: 0.98 }}
+              <div className="flex flex-col gap-4">
+                <button
                   onClick={() => { setCreationType('service'); setStep(2); }}
-                  className="bg-white border-4 border-black rounded-[32px] p-8 shadow-brutal text-left flex items-start gap-6 group"
+                  className="bg-white border border-slate-100 rounded-3xl p-6 shadow-[0_4px_24px_rgba(0,0,0,0.015)] text-left flex items-start gap-5 group hover:border-[hsl(var(--color-primary))]/20 hover:shadow-[0_8px_30px_rgba(255,20,147,0.02)] transition-all cursor-pointer"
                 >
-                   <div className="w-16 h-16 bg-pop-pink rounded-full flex items-center justify-center text-white border-2 border-black group-hover:rotate-12 transition-transform">
-                      <Construction size={32} />
+                   <div className="w-12 h-12 bg-pink-50 rounded-full flex items-center justify-center text-[hsl(var(--color-primary))] border border-pink-100/50 group-hover:scale-105 transition-transform flex-shrink-0">
+                      <Construction size={22} />
                    </div>
-                   <div className="flex flex-col gap-2">
-                      <h3 className="font-disp text-2xl font-black uppercase">Proyecto a Medida</h3>
-                      <p className="text-xs text-zinc-500 leading-relaxed font-text">Servicios creativos, tiempo, viáticos y clientes específicos.</p>
+                   <div className="flex flex-col gap-1">
+                      <h3 className="font-disp text-base font-bold uppercase text-slate-800">Proyecto a Medida</h3>
+                      <p className="text-[11px] text-slate-450 leading-relaxed font-text">Servicios creativos, tiempo, viáticos y clientes específicos.</p>
                    </div>
-                </motion.button>
+                </button>
 
-                <motion.button
-                  whileHover={{ scale: 1.02, rotate: 1 }}
-                  whileTap={{ scale: 0.98 }}
+                <button
                   onClick={() => { setCreationType('product'); setStep(2); }}
-                  className="bg-white border-4 border-black rounded-[32px] p-8 shadow-brutal text-left flex items-start gap-6 group"
+                  className="bg-white border border-slate-100 rounded-3xl p-6 shadow-[0_4px_24px_rgba(0,0,0,0.015)] text-left flex items-start gap-5 group hover:border-[hsl(var(--color-secondary))]/20 hover:shadow-[0_8px_30px_rgba(0,200,83,0.015)] transition-all cursor-pointer"
                 >
-                   <div className="w-16 h-16 bg-pop-green rounded-full flex items-center justify-center text-black border-2 border-black group-hover:-rotate-12 transition-transform">
-                      <Package size={32} />
+                   <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-[hsl(var(--color-secondary))] border border-emerald-100/50 group-hover:scale-105 transition-transform flex-shrink-0">
+                      <Package size={22} />
                    </div>
-                   <div className="flex flex-col gap-2">
-                      <h3 className="font-disp text-2xl font-black uppercase">Producto de Catálogo</h3>
-                      <p className="text-xs text-zinc-500 leading-relaxed font-text">Lotes, inventario, producción en serie y venta directa.</p>
+                   <div className="flex flex-col gap-1">
+                      <h3 className="font-disp text-base font-bold uppercase text-slate-800">Producto de Catálogo</h3>
+                      <p className="text-[11px] text-slate-450 leading-relaxed font-text">Lotes, inventario, producción en serie y venta directa.</p>
                    </div>
-                </motion.button>
+                </button>
               </div>
             </motion.div>
           )}
@@ -183,62 +179,62 @@ export default function CreationWizard() {
               initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
-              className="flex flex-col gap-10 py-8"
+              className="flex flex-col gap-8 py-4"
             >
-              <div className="flex items-center gap-4">
-                 <button onClick={() => setStep(1)} className="p-2 bg-surface rounded-full"><ArrowLeft size={18}/></button>
-                 <h2 className="font-disp text-2xl font-black uppercase italic">
+              <div className="flex items-center gap-3">
+                 <button onClick={() => setStep(1)} className="p-2 bg-slate-50 rounded-full text-slate-450 hover:text-slate-700 transition-colors cursor-pointer"><ArrowLeft size={16}/></button>
+                 <h2 className="font-disp text-lg font-bold uppercase text-slate-800">
                    {creationType === 'service' ? 'Logística de Servicio' : 'Plan de Producción'}
                  </h2>
               </div>
 
               <div className="space-y-6">
                 <div className="flex flex-col gap-2">
-                   <label className="font-mono text-[10px] uppercase font-bold text-zinc-400">Nombre del Proyecto / Producto</label>
+                   <label className="font-mono text-[9px] uppercase font-bold text-slate-400">Nombre del Proyecto / Producto</label>
                    <input 
                     type="text" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Ej: Mural Calle 10..."
-                    className="w-full bg-surface border-2 border-black p-4 rounded-2xl font-disp font-bold text-xl outline-none focus:ring-4 ring-pop-blue/20"
+                    className="w-full bg-slate-50/50 border border-slate-100 p-4 rounded-2xl font-disp font-bold text-base outline-none focus:border-[hsl(var(--color-primary))]/40 transition-all placeholder:text-slate-350 text-slate-700"
                    />
                 </div>
 
                 {creationType === 'service' ? (
                   /* --- FLOW 2A: SERVICE --- */
-                  <div className="flex flex-col gap-8">
+                  <div className="flex flex-col gap-6">
                     {/* Mano de Obra */}
-                    <div className="bg-surface p-6 rounded-[32px] border-2 border-border space-y-6">
+                    <div className="bg-white p-6 rounded-3xl border border-slate-100 space-y-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
                        <div className="flex justify-between items-center">
-                          <h3 className="font-disp font-black uppercase text-sm">Mano de Obra</h3>
-                          <div className="flex bg-white border-2 border-black rounded-lg overflow-hidden text-[10px] font-mono font-bold">
+                          <h3 className="font-disp font-bold uppercase text-xs text-slate-700">Mano de Obra</h3>
+                          <div className="flex bg-slate-50 border border-slate-100 rounded-lg overflow-hidden text-[9px] font-mono font-bold">
                              <button 
                                onClick={() => setServiceMode('hour')}
-                               className={`px-3 py-2 ${serviceMode === 'hour' ? 'bg-black text-white' : ''}`}
+                               className={`px-3 py-1.5 cursor-pointer ${serviceMode === 'hour' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-100'}`}
                              >HORA</button>
                              <button 
                                onClick={() => setServiceMode('day')}
-                               className={`px-3 py-2 ${serviceMode === 'day' ? 'bg-black text-white' : ''}`}
+                               className={`px-3 py-1.5 cursor-pointer ${serviceMode === 'day' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-100'}`}
                              >DÍA</button>
                           </div>
                        </div>
                        <div className="grid grid-cols-2 gap-4">
-                          <div className="flex flex-col gap-1">
-                             <span className="font-mono text-[8px] text-zinc-400 uppercase font-bold">Tarifa</span>
+                          <div className="flex flex-col gap-1.5">
+                             <span className="font-mono text-[8px] text-slate-400 uppercase font-bold">Tarifa</span>
                              <input 
                                type="number" 
-                               value={serviceRate}
+                               value={serviceRate || ''}
                                onChange={(e) => setServiceRate(Number(e.target.value))}
-                               className="bg-transparent border-b-2 border-black font-mono font-bold text-lg outline-none"
+                               className="bg-transparent border-b border-slate-200 focus:border-[hsl(var(--color-primary))] font-mono font-bold text-base text-slate-700 outline-none pb-0.5"
                              />
                           </div>
-                          <div className="flex flex-col gap-1">
-                             <span className="font-mono text-[8px] text-zinc-400 uppercase font-bold">Cantidad ({serviceMode})</span>
+                          <div className="flex flex-col gap-1.5">
+                             <span className="font-mono text-[8px] text-slate-400 uppercase font-bold">Cantidad ({serviceMode})</span>
                              <input 
                                type="number" 
-                               value={serviceTime}
+                               value={serviceTime || ''}
                                onChange={(e) => setServiceTime(Number(e.target.value))}
-                               className="bg-transparent border-b-2 border-black font-mono font-bold text-lg outline-none"
+                               className="bg-transparent border-b border-slate-200 focus:border-[hsl(var(--color-primary))] font-mono font-bold text-base text-slate-700 outline-none pb-0.5"
                              />
                           </div>
                        </div>
@@ -246,26 +242,26 @@ export default function CreationWizard() {
 
                     {/* Logística Accordion */}
                     <Accordion.Root type="multiple" className="space-y-4">
-                       <Accordion.Item value="materials" className="border-2 border-black rounded-[32px] overflow-hidden bg-white shadow-brutal-sm">
+                       <Accordion.Item value="materials" className="border border-slate-100 rounded-3xl overflow-hidden bg-white shadow-sm">
                           <Accordion.Header>
-                            <Accordion.Trigger className="w-full p-6 flex justify-between items-center font-disp font-black uppercase italic">
+                            <Accordion.Trigger className="w-full p-5 flex justify-between items-center font-disp font-bold text-xs uppercase text-slate-800 hover:bg-slate-50 transition-colors">
                                Materiales (Cofre)
                             </Accordion.Trigger>
                           </Accordion.Header>
-                          <Accordion.Content className="p-6 pt-0 space-y-4">
-                             <div className="flex flex-col gap-3">
+                          <Accordion.Content className="p-5 pt-0 space-y-4">
+                             <div className="flex flex-col gap-2.5">
                                {serviceCosts.map(item => (
-                                 <div key={item.id} className="flex items-center justify-between bg-surface p-3 rounded-xl border border-border">
-                                    <div className="flex flex-col">
-                                       <span className="font-disp font-bold text-xs uppercase">{item.name}</span>
-                                       <span className="font-mono text-[9px] text-zinc-400">{item.quantity} un x ${item.unitPrice}</span>
+                                 <div key={item.id} className="flex items-center justify-between bg-slate-50/50 p-3 rounded-xl border border-slate-100 text-slate-700">
+                                    <div className="flex flex-col gap-0.5">
+                                       <span className="font-disp font-bold text-xs uppercase text-slate-800">{item.name}</span>
+                                       <span className="font-mono text-[9px] font-bold text-slate-400">{item.quantity} un x ${item.unitPrice}</span>
                                     </div>
-                                    <button onClick={() => removeCostItem(item.id, 'service')} className="text-pop-red"><X size={16}/></button>
+                                    <button onClick={() => removeCostItem(item.id, 'service')} className="text-slate-350 hover:text-rose-500 transition-colors cursor-pointer"><X size={15}/></button>
                                  </div>
                                ))}
                                <button 
                                  onClick={() => addCostItem('service')}
-                                 className="w-full py-3 border-2 border-dashed border-zinc-300 rounded-xl text-zinc-400 font-mono text-[10px] uppercase font-bold flex items-center justify-center gap-2"
+                                 className="w-full py-3 border border-dashed border-slate-200 hover:border-slate-300 rounded-xl text-slate-500 font-disp text-[10px] uppercase font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
                                >
                                   <Plus size={14}/> Añadir Material
                                </button>
@@ -276,64 +272,64 @@ export default function CreationWizard() {
                   </div>
                 ) : (
                   /* --- FLOW 2B: PRODUCT --- */
-                  <div className="flex flex-col gap-8">
-                    <div className="bg-pop-blue p-8 rounded-[40px] text-white shadow-brutal space-y-6">
+                  <div className="flex flex-col gap-6">
+                    <div className="bg-slate-900 p-6 rounded-[2rem] text-white shadow-md space-y-6">
                        <div className="flex justify-between items-center">
-                          <h3 className="font-disp font-black uppercase text-sm">Lógica de Lote</h3>
-                          <Package size={20} className="opacity-50" />
+                          <h3 className="font-disp font-bold uppercase text-xs text-white/80">Lógica de Lote</h3>
+                          <Package size={18} className="opacity-55" />
                        </div>
                        <div className="grid grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                             <label className="font-mono text-[8px] uppercase font-bold text-white/60">Inversión Inicial</label>
+                          <div className="space-y-1.5">
+                             <label className="font-mono text-[8px] uppercase font-bold text-white/50">Inversión Inicial</label>
                              <input 
                                type="number"
-                               value={initialInvestment}
+                               value={initialInvestment || ''}
                                onChange={(e) => setInitialInvestment(Number(e.target.value))}
-                               className="w-full bg-white/10 border-b-2 border-white font-mono font-black text-2xl outline-none"
+                               className="w-full bg-white/5 border-b border-white/20 focus:border-white/50 font-mono font-black text-lg outline-none pb-1"
                              />
                           </div>
-                          <div className="space-y-2">
-                             <label className="font-mono text-[8px] uppercase font-bold text-white/60">Unidades Totales</label>
+                          <div className="space-y-1.5">
+                             <label className="font-mono text-[8px] uppercase font-bold text-white/50">Unidades Totales</label>
                              <input 
                                type="number"
-                               value={estimatedUnits}
+                               value={estimatedUnits || ''}
                                onChange={(e) => setEstimatedUnits(Number(e.target.value))}
-                               className="w-full bg-white/10 border-b-2 border-white font-mono font-black text-2xl outline-none"
+                               className="w-full bg-white/5 border-b border-white/20 focus:border-white/50 font-mono font-black text-lg outline-none pb-1"
                              />
                           </div>
                        </div>
-                       <div className="pt-4 border-t border-white/20 flex justify-between items-center">
-                          <span className="font-mono text-[10px] uppercase font-bold opacity-60">Inversión x Unidad:</span>
-                          <span className="font-mono font-black">${Math.round(initialInvestment / (estimatedUnits || 1))}</span>
+                       <div className="pt-4 border-t border-white/10 flex justify-between items-center text-[10px] font-mono">
+                          <span className="opacity-50">Inversión x Unidad:</span>
+                          <span className="font-black text-sm">${Math.round(initialInvestment / (estimatedUnits || 1))}</span>
                        </div>
                     </div>
 
                     {/* Production Costs List */}
-                    <div className="space-y-4">
-                       <h3 className="font-disp font-black uppercase text-sm text-zinc-400">Costos de Producción</h3>
-                       <div className="flex flex-col gap-3">
+                    <div className="space-y-3.5">
+                       <h3 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Costos de Producción</h3>
+                       <div className="flex flex-col gap-2.5">
                           {productionCosts.map(item => (
-                            <div key={item.id} className="flex items-center gap-3 bg-surface p-4 rounded-2xl border-2 border-border">
+                            <div key={item.id} className="flex items-center gap-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
                                <input 
                                  placeholder="Nombre..."
-                                 className="flex-1 bg-transparent font-disp font-bold text-xs uppercase outline-none"
+                                 className="flex-1 bg-transparent font-disp font-bold text-xs uppercase outline-none text-slate-700"
                                  value={item.name}
                                  onChange={(e) => updateCostItem(item.id, { name: e.target.value }, 'production')}
                                />
                                <input 
                                  type="number"
-                                 className="w-16 bg-white border-2 border-black rounded-lg p-1 font-mono text-[10px] text-center"
-                                 value={item.unitPrice}
+                                 className="w-16 bg-slate-50 border border-slate-100 rounded-lg p-1.5 font-mono text-[10px] text-center text-slate-700 focus:border-[hsl(var(--color-primary))] outline-none"
+                                 value={item.unitPrice || ''}
                                  onChange={(e) => updateCostItem(item.id, { unitPrice: Number(e.target.value) }, 'production')}
                                />
-                               <button onClick={() => removeCostItem(item.id, 'production')} className="text-zinc-300"><X size={16}/></button>
+                               <button onClick={() => removeCostItem(item.id, 'production')} className="text-slate-300 hover:text-rose-500 cursor-pointer"><X size={15}/></button>
                             </div>
                           ))}
                           <button 
                             onClick={() => addCostItem('production')}
-                            className="py-4 border-2 border-dashed border-border rounded-2xl text-zinc-400 flex items-center justify-center"
+                            className="py-3.5 border border-dashed border-slate-200 hover:border-slate-300 bg-slate-50/50 hover:bg-slate-50 rounded-2xl text-slate-400 flex items-center justify-center cursor-pointer transition-all"
                           >
-                             <Plus size={18}/>
+                             <Plus size={16}/>
                           </button>
                        </div>
                     </div>
@@ -343,9 +339,9 @@ export default function CreationWizard() {
 
               <button 
                 onClick={() => setStep(3)}
-                className="w-full bg-black text-white py-6 rounded-full font-disp text-xl font-black uppercase italic shadow-brutal flex items-center justify-center gap-3 mt-4"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-full font-disp text-xs font-bold uppercase tracking-wider shadow-md flex items-center justify-center gap-2 mt-4 cursor-pointer transition-all"
               >
-                 Continuar al Simulador <ArrowRight size={20}/>
+                 Continuar al Simulador <ArrowRight size={15}/>
               </button>
             </motion.div>
           )}
@@ -357,21 +353,21 @@ export default function CreationWizard() {
               initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -100 }}
-              className="flex flex-col gap-12 py-8"
+              className="flex flex-col gap-8 py-4"
             >
-               <div className="flex items-center gap-4">
-                 <button onClick={() => setStep(2)} className="p-2 bg-surface rounded-full"><ArrowLeft size={18}/></button>
-                 <h2 className="font-disp text-2xl font-black uppercase italic">Definir Precio</h2>
+               <div className="flex items-center gap-3">
+                 <button onClick={() => setStep(2)} className="p-2 bg-slate-50 rounded-full text-slate-450 hover:text-slate-700 transition-colors cursor-pointer"><ArrowLeft size={16}/></button>
+                 <h2 className="font-disp text-lg font-bold uppercase text-slate-800">Definir Precio</h2>
               </div>
 
-              <div className="bg-white border-4 border-black rounded-[40px] p-10 shadow-brutal flex flex-col items-center gap-10 text-center relative overflow-hidden">
-                 <div className="absolute top-0 inset-x-0 h-2 bg-pop-blue animate-pulse" />
+              <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-[0_4px_30px_rgba(0,0,0,0.015)] flex flex-col items-center gap-8 text-center relative overflow-hidden">
+                 <div className="absolute top-0 inset-x-0 h-1 bg-[hsl(var(--color-primary))]/20" />
                  
-                 <div className="space-y-2">
-                    <span className="font-mono text-[10px] uppercase font-bold text-zinc-400 tracking-[0.3em]">Margen de Ganancia</span>
+                 <div className="space-y-1">
+                    <span className="font-mono text-[9px] uppercase font-bold text-slate-400 tracking-[0.2em]">Margen de Ganancia</span>
                     <div className="flex items-center justify-center gap-2">
-                       <span className={`font-mono text-7xl font-black ${
-                         profitMargin > 60 ? 'text-pop-green' : profitMargin > 40 ? 'text-pop-yellow' : 'text-pop-red'
+                       <span className={`font-mono text-5xl font-black ${
+                         profitMargin > 60 ? 'text-emerald-500' : profitMargin > 40 ? 'text-amber-500' : 'text-rose-500'
                        }`}>
                          {Math.round(profitMargin)}%
                        </span>
@@ -379,30 +375,30 @@ export default function CreationWizard() {
                  </div>
 
                  {/* Slider Grueso */}
-                 <div className="w-full space-y-6">
+                 <div className="w-full space-y-4">
                     <div className="flex justify-between items-end">
-                       <label className="font-disp font-black uppercase text-xs">Precio de Venta Sugerido</label>
-                       <span className="font-mono text-3xl font-black text-black">${sellingPrice.toLocaleString()}</span>
+                       <label className="font-disp font-extrabold text-xs uppercase text-slate-450">Precio de Venta Sugerido</label>
+                       <span className="font-mono text-xl font-black text-slate-700">${sellingPrice.toLocaleString()}</span>
                     </div>
                     
                     <Slider.Root
-                      className="relative flex items-center select-none touch-none w-full h-10"
+                      className="relative flex items-center select-none touch-none w-full h-8"
                       value={[sellingPrice]}
                       max={productCost * 5}
                       step={1}
                       onValueChange={([val]) => setSellingPrice(val)}
                     >
-                      <Slider.Track className="bg-zinc-100 relative grow rounded-full h-4 border-2 border-black">
+                      <Slider.Track className="bg-slate-100 relative grow rounded-full h-2.5">
                         <Slider.Range className={`absolute h-full rounded-full ${
-                          profitMargin > 60 ? 'bg-pop-green' : profitMargin > 40 ? 'bg-pop-yellow' : 'bg-pop-red'
+                          profitMargin > 60 ? 'bg-emerald-400' : profitMargin > 40 ? 'bg-amber-400' : 'bg-rose-400'
                         }`} />
                       </Slider.Track>
-                      <Slider.Thumb className="block w-10 h-10 bg-white border-4 border-black rounded-full shadow-brutal-sm focus:outline-none hover:scale-110 transition-transform cursor-grab active:cursor-grabbing" />
+                      <Slider.Thumb className="block w-5 h-5 bg-white border border-slate-200 rounded-full shadow-md focus:outline-none hover:scale-105 transition-transform cursor-pointer" />
                     </Slider.Root>
                  </div>
 
-                 <div className={`p-4 rounded-2xl border-2 font-text text-xs leading-relaxed ${
-                   profitMargin > 60 ? 'bg-pop-green/10 border-pop-green text-pop-green' : 'bg-pop-red/10 border-pop-red text-pop-red'
+                 <div className={`p-4 rounded-2xl border font-text text-[11px] leading-relaxed ${
+                   profitMargin > 60 ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'
                  }`}>
                     {profitMargin > 60 ? '✨ ¡Salud financiera excelente! Tienes margen para imprevistos.' : '⚠️ Margen bajo. Considera reducir costos o aumentar el precio de venta.'}
                  </div>
@@ -411,9 +407,9 @@ export default function CreationWizard() {
               <button 
                 onClick={handleSave}
                 disabled={sellingPrice === 0}
-                className="w-full bg-pop-blue text-white py-8 rounded-[32px] font-disp text-2xl font-black uppercase italic shadow-brutal flex items-center justify-center gap-4 hover:-translate-y-1 active:translate-y-1 transition-all disabled:opacity-50 disabled:translate-y-0"
+                className="w-full bg-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-primary-hover))] text-white py-4.5 rounded-full font-disp text-xs font-bold uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
               >
-                 <Save size={28}/> Guardar Creación
+                 <Save size={15}/> Guardar Creación
               </button>
             </motion.div>
           )}

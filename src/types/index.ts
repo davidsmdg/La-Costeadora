@@ -33,6 +33,7 @@ export interface CostItem {
   affectedByAuthorship: boolean;
   /** Referencia opcional al item de inventario global */
   inventoryId?: string;
+  isFixed?: boolean;
 }
 
 // ─── Inventario Global ───────────────────────────────────────
@@ -63,6 +64,14 @@ export interface Product {
   createdAt: string;       // ISO date string
   /** Materiales del inventario global usados en este producto */
   inventoryUsage?: InventoryUsage[];
+  monthlySales?: MonthlySale[];
+}
+
+export interface MonthlySale {
+  id?: string;
+  productId: string;
+  month: string; // Formato 'YYYY-MM'
+  unitsSold: number;
 }
 
 export interface InventoryUsage {
@@ -82,6 +91,10 @@ export interface FixedExpenses {
   subscriptions: Subscription[];
   workshopRent: number;
   equipmentInstallments: number;
+
+  /** Meta mensual directa (sin desglose). Cuando está definida y > 0, 
+   *  getMonthlyObjective() la usa en lugar de sumar los ítems. */
+  directGoal?: number;
 }
 
 export interface Subscription {
@@ -171,6 +184,7 @@ export interface FinancialState {
 // ─── Contexto (shape del Context API) ────────────────────────
 
 export interface FinancialContextType extends FinancialState {
+  loading: boolean;
   // Studio
   updateStudio: (data: Partial<StudioConfig>) => void;
 
@@ -181,6 +195,7 @@ export interface FinancialContextType extends FinancialState {
   addProduct: (product: Omit<Product, 'id' | 'createdAt'>) => void;
   updateProduct: (id: string, data: Partial<Product>) => void;
   removeProduct: (id: string) => void;
+  setMonthlySale: (productId: string, month: string, unitsSold: number) => Promise<void>;
 
   // Inventory
   addInventoryItem: (item: Omit<InventoryItem, 'id'>) => void;
@@ -201,4 +216,5 @@ export interface FinancialContextType extends FinancialState {
   getAccumulatedCash: () => number;
   getMarginStatus: (margin: number) => MarginStatus;
   getStockStatus: (item: InventoryItem) => StockStatus;
+  getProjectsTotalUtility: () => number;
 }
