@@ -265,6 +265,20 @@ export default function CreationPage() {
           {/* Left Column: Cost Elements */}
           <div className="lg:col-span-7 space-y-8">
             
+            {/* INPUT NOMBRE (Primer campo a rellenar) */}
+            <section className="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.015)] flex flex-col gap-2.5">
+               <label className="font-mono text-[9px] uppercase font-bold text-slate-400">
+                 {creationType === 'project' ? 'Nombre de tu proyecto a medida' : 'Nombre de tu producto'}
+               </label>
+               <input 
+                type="text" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={creationType === 'project' ? 'Ej: Mural Calle 10...' : 'Ej: Camiseta radikal...'}
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4.5 font-disp font-bold text-base outline-none focus:border-[hsl(var(--color-primary))]/40 focus:bg-white transition-all placeholder:text-slate-350 text-slate-700 shadow-sm focus:shadow-md"
+               />
+            </section>
+
             {/* 1. Mano de Obra */}
             <section className="space-y-3.5">
                <div className="flex items-center gap-1.5">
@@ -467,19 +481,7 @@ export default function CreationPage() {
             
 
 
-            {/* INPUT NOMBRE */}
-            <section className="flex flex-col gap-2.5">
-               <label className="font-mono text-[9px] uppercase font-bold text-slate-400">
-                 {creationType === 'project' ? 'Nombre de tu proyecto a medida' : 'Nombre de tu producto'}
-               </label>
-               <input 
-                type="text" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={creationType === 'project' ? 'Ej: Mural Calle 10...' : 'Ej: Camiseta radikal...'}
-                className="w-full bg-white border border-slate-100 p-4.5 rounded-2xl font-disp font-bold text-base outline-none focus:border-[hsl(var(--color-primary))]/40 transition-all placeholder:text-slate-300 text-slate-700 shadow-sm focus:shadow-md"
-               />
-            </section>
+
 
             {/* D. PRICING Y GUARDADO */}
             <section className="bg-white border border-slate-100 rounded-3xl p-6.5 shadow-[0_4px_20px_rgba(0,0,0,0.015)] space-y-6">
