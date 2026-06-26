@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: 264 89% 58%;         /* Púrpura eléctrico – identidad Radikal */
+  --color-primary: 264 89% 58%;         /* Púrpura eléctrico – identidad de la app */
   --color-primary-hover: 264 89% 50%;
   --color-secondary: 182 53% 50%;       /* Color complementario (turquesa) */
   --color-bg: 210 40% 98%;              /* Color de fondo ultra limpio */
@@ -11,7 +11,7 @@
 }
 
 /* ============================================================
-   LA COSTEADORA – DESIGN SYSTEM TOKENS (RADIKAL STYLE)
+   LA COSTEADORA – DESIGN SYSTEM TOKENS
    ============================================================ */
 
 @theme {
@@ -20,7 +20,7 @@
   --font-text: "Inter", sans-serif;
   --font-mono: "Martian Mono", monospace;
 
-  /* --- Colores base (Radikal) --- */
+  /* --- Colores base --- */
   --color-canvas:     hsl(var(--color-bg));
   --color-canvas-alt: hsl(var(--color-bg));
   --color-foreground: hsl(var(--color-foreground));
@@ -28,7 +28,7 @@
   --color-border:     hsl(var(--color-border));
   --color-muted:      hsl(var(--color-muted));
 
-  /* --- Colores de marca Radikal --- */
+  /* --- Colores de marca --- */
   --color-primary:    hsl(var(--color-primary));
   --color-primary-hover: hsl(var(--color-primary-hover));
   --color-secondary:  hsl(var(--color-secondary));
@@ -184,7 +184,7 @@ body {
   box-shadow: var(--shadow-brutal-inv);
 }
 
-/* Tarjetas alineadas y limpias para el estilo Radikal */
+/* Tarjetas alineadas y limpias */
 .sticker-r1, .sticker-r2, .sticker-r3,
 .sticker-l1, .sticker-l2, .sticker-l3 {
   transform: rotate(0deg) !important;

@@ -274,7 +274,7 @@ export default function CreationPage() {
                 type="text" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder={creationType === 'project' ? 'Ej: Mural Calle 10...' : 'Ej: Camiseta radikal...'}
+                placeholder={creationType === 'project' ? 'Ej: Mural Calle 10...' : 'Ej: Camiseta estampada...'}
                 className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4.5 font-disp font-bold text-base outline-none focus:border-[hsl(var(--color-primary))]/40 focus:bg-white transition-all placeholder:text-slate-350 text-slate-700 shadow-sm focus:shadow-md"
                />
             </section>
