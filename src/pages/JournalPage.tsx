@@ -2,214 +2,249 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Send, Mic, AlertTriangle, TrendingUp, History, X } from 'lucide-react';
+import { Plus, X, ArrowLeft, TrendingUp, History, Trash2, Calendar } from 'lucide-react';
 import { useFinancialData } from '../context/FinancialDataContext';
 
 const formatCOP = (n: number) => '$' + n.toLocaleString('es-CO') + ' COP';
 
 export default function JournalPage() {
   const navigate = useNavigate();
-  const { transactions, addTransaction, getAccumulatedCash } = useFinancialData();
-  const [isInputOpen, setIsInputOpen] = useState(false);
-  const [inputText, setInputText] = useState('');
+  const { transactions, addTransaction, removeTransaction, getAccumulatedCash, products } = useFinancialData();
+  
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'income' | 'expense'>('income');
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState<number | ''>('');
+  const [category, setCategory] = useState('otro');
+  const [productId, setProductId] = useState('');
 
-  const cash = getAccumulatedCash();
-  const isLiquidityCritical = cash < 0;
+  // Math Calculations (Real Transactions)
+  const realTransactions = transactions.filter(t => !t.isProjection);
+  const haEntrado = realTransactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+  const haSalido = realTransactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+  const plataLibre = haEntrado - haSalido;
+
   const upcomingProjections = transactions.filter(t => t.isProjection);
 
-  const parseInput = (text: string) => {
-    const lower = text.toLowerCase();
-    const amountMatch = lower.match(/(\d[\d.,]*k?)/);
-    let amount = 0;
-    if (amountMatch) {
-      let val = amountMatch[0].replace(/\./g, '').replace(',', '.');
-      if (val.endsWith('k')) amount = parseFloat(val) * 1000;
-      else amount = parseFloat(val);
-    }
-    let type: 'income' | 'expense' = 'expense';
-    if (lower.includes('recibí') || lower.includes('gané') || lower.includes('cobré') || lower.includes('anticipo')) {
-      type = 'income';
-    }
-    let category = 'otro';
-    if (lower.includes('material') || lower.includes('pintura') || lower.includes('insumo')) category = 'materiales';
-    if (lower.includes('taxi') || lower.includes('uber') || lower.includes('bus')) category = 'viaticos';
-    if (lower.includes('adobe') || lower.includes('canva') || lower.includes('suscripcion')) category = 'suscripcion';
-    return { type, amount, description: text, category, date: new Date().toISOString() };
-  };
+  const handleSaveTransaction = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!description.trim() || !amount || amount <= 0) return;
 
-  const handleSend = () => {
-    if (!inputText) return;
-    const tx = parseInput(inputText);
-    if (tx.amount > 0) {
-      addTransaction(tx as any);
-      setInputText('');
-      setIsInputOpen(false);
-    }
+    addTransaction({
+      type: modalType,
+      amount: Number(amount),
+      description: description.trim(),
+      category: category as any,
+      date: new Date().toISOString(),
+      productId: productId || undefined,
+      isProjection: false
+    });
+
+    // Reset Form
+    setDescription('');
+    setAmount('');
+    setCategory('otro');
+    setProductId('');
+    setIsModalOpen(false);
   };
 
   return (
-    <div className="page-wrapper min-h-screen bg-[var(--color-canvas)] flex flex-col font-text pb-24 max-w-6xl mx-auto w-full" style={{ paddingTop: '0' }}>
-
-      {/* Sticky Liquidity Banner */}
-      <div className={`sticky top-0 z-50 flex items-center justify-between gap-3 px-6 py-3.5 shadow-sm transition-all duration-300 ${
-        isLiquidityCritical
-          ? 'bg-rose-500 text-white'
-          : 'bg-white border-b border-slate-100'
-      }`}>
-        <div className="flex items-center gap-2.5">
-          <AlertTriangle
-            size={14}
-            className={isLiquidityCritical ? 'text-white animate-bounce' : 'text-slate-400'}
-          />
-          <span className={`font-mono text-[9px] uppercase font-bold tracking-wider ${isLiquidityCritical ? 'text-white/90' : 'text-slate-400'}`}>
-            Caja Proyectada
-          </span>
-        </div>
-        <span className={`font-mono text-sm font-black ${isLiquidityCritical ? 'text-white' : 'text-[hsl(var(--color-primary))]'}`}>
-          {formatCOP(cash)}
-        </span>
-      </div>
+    <div className="page-wrapper min-h-screen bg-[var(--color-canvas)] flex flex-col font-text pb-24 max-w-xl mx-auto w-full px-6" style={{ paddingTop: '0' }}>
 
       {/* Header */}
-      <header className="pt-8 pb-3 flex items-center justify-between">
-        <div className="flex flex-col gap-0.5">
-          <h1 className="font-disp text-2xl font-extrabold tracking-tight text-slate-900">El Diario</h1>
-          <span className="font-mono text-[9px] uppercase text-slate-400 tracking-wider font-bold">Registro Financiero</span>
+      <header className="pt-8 pb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            className="p-2 bg-white border border-slate-100 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-all shadow-sm cursor-pointer"
+          >
+            <ArrowLeft size={18} />
+          </button>
+          <div className="flex flex-col gap-0.5">
+            <h1 className="font-disp text-2xl font-extrabold tracking-tight text-slate-900">Mis Cuentas Claras</h1>
+            <span className="font-mono text-[9px] uppercase text-slate-400 tracking-wider font-bold">Registro Diario</span>
+          </div>
         </div>
         <button
           onClick={() => navigate('/dashboard')}
-          className="w-9 h-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 shadow-sm transition-all cursor-pointer"
+          className="w-9 h-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-650 hover:bg-slate-50 shadow-sm transition-all cursor-pointer"
         >
           <TrendingUp size={15} />
         </button>
       </header>
 
-      <main className="flex-1 w-full py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Left Column: Milestones and Quick Input (on desktop) */}
-          <div className="lg:col-span-5 space-y-8 lg:sticky lg:top-24">
-            
-            {/* Quick Input (Desktop Only) */}
-            <div className="hidden lg:block bg-white border border-slate-100 rounded-3xl p-6.5 shadow-[0_4px_20px_rgba(0,0,0,0.015)] space-y-4">
-              <h3 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Registro Rápido</h3>
-              <textarea
-                placeholder="Ej: Recibí $500k del mural..."
-                className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl p-4 text-xs font-disp font-bold outline-none placeholder:text-slate-350 resize-none h-24 text-slate-705 focus:border-[hsl(var(--color-primary))]/40 transition-all"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-              />
-              <div className="flex gap-3 items-center">
-                <button className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[hsl(var(--color-primary))] hover:bg-slate-100 hover:border-slate-200 transition-all flex-shrink-0 cursor-pointer">
-                  <Mic size={16} />
-                </button>
-                <button
-                  onClick={handleSend}
-                  className="flex-1 h-10 bg-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-primary-hover))] text-white rounded-xl font-disp font-bold text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-2 hover:-translate-y-0.5 transition-all active:scale-[0.98] cursor-pointer"
-                >
-                  Registrar <Send size={13} />
-                </button>
-              </div>
-            </div>
+      <main className="flex-1 w-full space-y-6">
 
-            {/* Upcoming Milestones */}
-            <section className="space-y-3">
-              <div className="flex items-center gap-1.5">
-                <TrendingUp size={14} className="text-[hsl(var(--color-primary))]" />
-                <h2 className="font-mono text-[9px] uppercase font-bold tracking-wider text-slate-400">
-                  Próximos 30 días
-                </h2>
-              </div>
-              
-              {upcomingProjections.length > 0 ? (
-                <div className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-x-visible pb-2 scrollbar-hide lg:pb-0">
-                  {upcomingProjections.map(tx => (
-                    <div key={tx.id} className="min-w-[200px] w-full bg-white border border-slate-100 p-4.5 rounded-2xl flex flex-col gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.015)] flex-shrink-0">
-                      <span className="font-mono text-[8px] text-slate-400 font-bold uppercase tracking-wider">
-                        {tx.type === 'income' ? 'Hito de Cobro' : 'Gasto Proyectado'}
-                      </span>
-                      <span className="font-disp font-bold text-xs text-slate-800">{tx.description}</span>
-                      <span className={`font-mono font-black text-xs ${tx.type === 'income' ? 'text-[hsl(var(--color-secondary))]' : 'text-rose-500'}`}>
-                        {tx.type === 'income' ? '+' : '-'}{formatCOP(tx.amount)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-white border border-slate-100 p-5 rounded-2xl flex flex-col gap-2 shadow-[0_4px_12px_rgba(0,0,0,0.015)]">
-                  <p className="font-text text-xs text-slate-600 font-bold">
-                    📖 ¡Lleva el control de tu caja!
-                  </p>
-                  <p className="font-text text-[11px] text-slate-400 leading-relaxed">
-                    Registra ingresos y gastos futuros con el botón <strong>+</strong> para proyectar tu flujo de caja, o ingresa al Dashboard para gestionar tu catálogo e inventario.
-                  </p>
-                </div>
-              )}
-            </section>
+        {/* 1. KPI Card: Balance Resumen (Ganancia / Entrado / Salido) */}
+        <div className="bg-slate-900 text-white p-6 rounded-3xl border-2 border-slate-950 shadow-[4px_4px_0px_#111118] space-y-5">
+          <div>
+            <span className="font-mono text-[9px] uppercase tracking-widest text-slate-400 font-bold">Plata Libre (Ganancia)</span>
+            <div className="font-disp text-4xl font-black tracking-tight text-white mt-1">
+              {formatCOP(plataLibre)}
+            </div>
           </div>
-
-          {/* Right Column: Transaction Log */}
-          <div className="lg:col-span-7 space-y-3">
-            <div className="flex items-center gap-1.5">
-              <History size={14} className="text-[hsl(var(--color-primary))]" />
-              <h2 className="font-mono text-[9px] uppercase font-bold tracking-wider text-slate-400">
-                Registro
-              </h2>
+          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+            <div>
+              <span className="font-mono text-[8px] uppercase tracking-wider text-slate-400 font-bold block mb-1">↗ Ha Entrado</span>
+              <span className="font-mono text-xs font-black text-emerald-400">+{formatCOP(haEntrado)}</span>
             </div>
+            <div>
+              <span className="font-mono text-[8px] uppercase tracking-wider text-slate-400 font-bold block mb-1">↘ Ha Salido</span>
+              <span className="font-mono text-xs font-black text-rose-400">-{formatCOP(haSalido)}</span>
+            </div>
+          </div>
+        </div>
 
-            <div className="flex flex-col gap-3.5">
-              {transactions.length === 0 && (
-                <p className="font-text text-xs text-slate-400 text-center py-12">
-                  Aún no hay movimientos. Registra tu primer ingreso o gasto.
-                </p>
-              )}
-              {transactions.slice().reverse().map((tx) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  key={tx.id}
-                  className={`flex flex-col max-w-[85%] ${tx.type === 'income' ? 'self-end items-end' : 'self-start items-start'}`}
-                >
-                  <div className={`px-4.5 py-3.5 rounded-2xl ${
-                    tx.type === 'income'
-                      ? 'bg-[hsl(var(--color-primary))]/5 border border-[hsl(var(--color-primary))]/10'
-                      : 'bg-white border border-slate-100 shadow-[0_4px_12px_rgba(0,0,0,0.01)]'
-                  }`}>
-                    <p className="font-text text-xs font-semibold text-slate-700 leading-relaxed">
-                      {tx.description}
-                    </p>
-                    <div className={`mt-1.5 font-mono text-base font-black ${
-                      tx.type === 'income' ? 'text-[hsl(var(--color-primary))]' : 'text-rose-500'
-                    }`}>
-                      {tx.type === 'income' ? '+' : '-'}{formatCOP(tx.amount)}
-                    </div>
-                  </div>
-                  <span className="mt-1 font-mono text-[8px] text-slate-400 uppercase font-bold px-1 tracking-wider">
-                    {tx.category} · {new Date(tx.date).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
+        {/* 2. Botones de Acción Rápidos (Lado a Lado) */}
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            onClick={() => {
+              setModalType('income');
+              setCategory('cobro_final');
+              setIsModalOpen(true);
+            }}
+            className="flex flex-col items-center justify-center py-6 px-4 bg-emerald-50 border-2 border-emerald-200 hover:bg-emerald-100/50 rounded-3xl text-center transition-all active:scale-[0.98] cursor-pointer shadow-[3px_3px_0px_#10b981]"
+          >
+            <span className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-disp text-lg font-bold mb-2 shadow-sm">+</span>
+            <span className="font-disp font-black text-xs uppercase tracking-wider text-emerald-950">Anotar una Venta</span>
+            <span className="font-text text-[9px] text-emerald-800/80 mt-1">Ingreso de dinero</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setModalType('expense');
+              setCategory('materiales');
+              setIsModalOpen(true);
+            }}
+            className="flex flex-col items-center justify-center py-6 px-4 bg-rose-50 border-2 border-rose-200 hover:bg-rose-100/50 rounded-3xl text-center transition-all active:scale-[0.98] cursor-pointer shadow-[3px_3px_0px_#f43f5e]"
+          >
+            <span className="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center font-disp text-lg font-bold mb-2 shadow-sm">-</span>
+            <span className="font-disp font-black text-xs uppercase tracking-wider text-rose-950">Anotar un Gasto</span>
+            <span className="font-text text-[9px] text-rose-800/80 mt-1">Salida de dinero</span>
+          </button>
+        </div>
+
+        {/* 3. Próximos 30 días (Proyecciones) */}
+        <section className="space-y-3 pt-2">
+          <div className="flex items-center gap-1.5">
+            <Calendar size={14} className="text-[hsl(var(--color-primary))]" />
+            <h2 className="font-mono text-[9px] uppercase font-bold tracking-wider text-slate-400">
+              Próximos 30 días
+            </h2>
+          </div>
+          
+          {upcomingProjections.length > 0 ? (
+            <div className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-x-visible pb-2 scrollbar-hide lg:pb-0">
+              {upcomingProjections.map(tx => (
+                <div key={tx.id} className="min-w-[200px] w-full bg-white border border-slate-100 p-4.5 rounded-2xl flex flex-col gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.015)] flex-shrink-0">
+                  <span className="font-mono text-[8px] text-slate-400 font-bold uppercase tracking-wider">
+                    {tx.type === 'income' ? 'Hito de Cobro' : 'Gasto Proyectado'}
                   </span>
-                </motion.div>
+                  <span className="font-disp font-bold text-xs text-slate-800">{tx.description}</span>
+                  <span className={`font-mono font-black text-xs ${tx.type === 'income' ? 'text-[hsl(var(--color-secondary))]' : 'text-rose-500'}`}>
+                    {tx.type === 'income' ? '+' : '-'}{formatCOP(tx.amount)}
+                  </span>
+                </div>
               ))}
             </div>
+          ) : null}
+        </section>
+
+        {/* 4. Historial de Movimientos */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-1.5">
+            <History size={14} className="text-[hsl(var(--color-primary))]" />
+            <h2 className="font-mono text-[9px] uppercase font-bold tracking-wider text-slate-400">
+              Historial de Movimientos
+            </h2>
           </div>
 
-        </div>
+          <div className="flex flex-col gap-3">
+            {transactions.length === 0 ? (
+              <div className="bg-white border border-slate-100 p-6 rounded-3xl text-center py-10 shadow-sm">
+                <p className="font-text text-xs text-slate-500 font-bold">
+                  📖 ¡Aún no hay movimientos!
+                </p>
+                <p className="font-text text-[10px] text-slate-400 leading-relaxed mt-1">
+                  Registra ingresos y gastos futuros con los botones superiores para proyectar tu flujo de caja, o ingresa al Dashboard para gestionar tu catálogo e inventario.
+                </p>
+              </div>
+            ) : (
+              transactions.slice().reverse().map((tx) => {
+                const associatedProduct = products.find(p => p.id === tx.productId);
+                return (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    key={tx.id}
+                    className="bg-white border border-slate-100 p-4.5 rounded-2xl flex items-center justify-between gap-4 shadow-[0_4px_12px_rgba(0,0,0,0.015)]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${
+                        tx.type === 'income'
+                          ? 'bg-emerald-50 text-emerald-500'
+                          : 'bg-rose-50 text-rose-500'
+                      }`}>
+                        {tx.category === 'materiales' ? '🎨' :
+                         tx.category === 'viaticos' ? '🚚' :
+                         tx.category === 'suscripcion' ? '⚡' :
+                         tx.category === 'taller' ? '🏢' :
+                         tx.category === 'equipo' ? '⚙️' :
+                         tx.category === 'personal' ? '👥' :
+                         tx.category === 'anticipo' ? '💰' :
+                         tx.category === 'cobro_final' ? '💵' :
+                         '🏷️'}
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-disp font-bold text-xs text-slate-800">{tx.description}</span>
+                        <span className="font-text text-[9px] text-slate-400">
+                          {associatedProduct ? (
+                            <span className="text-[hsl(var(--color-primary))] font-semibold">
+                              {associatedProduct.name}
+                            </span>
+                          ) : (
+                            'Sin proyecto'
+                          )}
+                          {` · ${new Date(tx.date).toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })}`}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`font-mono text-xs font-black ${
+                        tx.type === 'income' ? 'text-emerald-500' : 'text-rose-500'
+                      }`}>
+                        {tx.type === 'income' ? '+' : '-'}{formatCOP(tx.amount)}
+                      </span>
+                      <button
+                        onClick={() => removeTransaction(tx.id)}
+                        className="text-slate-300 hover:text-rose-500 p-1.5 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })
+            )}
+          </div>
+        </section>
+
       </main>
 
-      {/* FAB (Mobile Only) */}
-      <button
-        onClick={() => setIsInputOpen(true)}
-        className="fixed bottom-24 right-6 z-50 w-12 h-12 rounded-full bg-[hsl(var(--color-primary))] text-white shadow-lg flex items-center justify-center hover:bg-[hsl(var(--color-primary-hover))] hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer lg:hidden"
-      >
-        <Plus size={22} strokeWidth={2.5} />
-      </button>
-
-      {/* Quick Input Modal */}
-      <Dialog.Root open={isInputOpen} onOpenChange={setIsInputOpen}>
+      {/* Modal para Registrar Movimiento */}
+      <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
         <AnimatePresence>
-          {isInputOpen && (
+          {isModalOpen && (
             <Dialog.Portal forceMount>
               <Dialog.Overlay asChild>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="bottom-sheet-overlay" />
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50"
+                />
               </Dialog.Overlay>
               <Dialog.Content asChild>
                 <motion.div
@@ -217,37 +252,121 @@ export default function JournalPage() {
                   animate={{ y: 0 }}
                   exit={{ y: '100%' }}
                   transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                  className="fixed bottom-0 inset-x-0 z-50 bg-white rounded-t-[2.5rem] pt-5 pb-12 px-6 shadow-2xl border-t border-slate-100 focus:outline-none max-w-lg mx-auto"
+                  className="fixed bottom-0 inset-x-0 z-50 bg-white rounded-t-[2.5rem] pt-5 pb-10 px-6 shadow-2xl border-t border-slate-100 focus:outline-none max-w-lg mx-auto"
                 >
                   <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-6" />
 
                   <div className="flex justify-between items-center mb-5">
-                    <Dialog.Title className="font-disp text-lg font-extrabold text-slate-800">
-                      Registro Rápido
+                    <Dialog.Title className="font-disp text-lg font-black text-slate-800 flex items-center gap-2">
+                      {modalType === 'income' ? (
+                        <>
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                          Anotar una Venta / Ingreso
+                        </>
+                      ) : (
+                        <>
+                          <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                          Anotar un Gasto / Salida
+                        </>
+                      )}
                     </Dialog.Title>
-                    <Dialog.Close className="p-2 bg-slate-50 rounded-xl text-slate-400 hover:text-slate-600 transition-colors border border-slate-100 cursor-pointer"><X size={15} /></Dialog.Close>
+                    <Dialog.Close className="p-2 bg-slate-50 rounded-xl text-slate-400 hover:text-slate-650 transition-colors border border-slate-100 cursor-pointer">
+                      <X size={15} />
+                    </Dialog.Close>
                   </div>
 
-                  <div className="flex flex-col gap-5">
-                    <textarea
-                      autoFocus
-                      placeholder="Ej: Recibí $500k del mural..."
-                      className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl p-4.5 text-base font-disp font-bold outline-none placeholder:text-slate-300 resize-none h-28 text-slate-700 focus:border-[hsl(var(--color-primary))]/40 transition-all"
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                    />
-                    <div className="flex gap-3 items-center">
-                      <button className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[hsl(var(--color-primary))] hover:bg-slate-100 hover:border-slate-200 transition-all flex-shrink-0 cursor-pointer">
-                        <Mic size={18} />
-                      </button>
-                      <button
-                        onClick={handleSend}
-                        className="flex-1 h-12 bg-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-primary-hover))] text-white rounded-xl font-disp font-bold text-xs shadow-md flex items-center justify-center gap-2 hover:-translate-y-0.5 transition-all active:scale-[0.98] cursor-pointer"
-                      >
-                        Registrar <Send size={15} />
-                      </button>
+                  <form onSubmit={handleSaveTransaction} className="space-y-4">
+                    {/* Monto */}
+                    <div className="space-y-1.5">
+                      <label className="font-mono text-[10px] uppercase tracking-widest text-slate-400 font-bold block">
+                        Monto (COP)
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="$0"
+                        required
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-lg font-mono font-black text-slate-800 focus:outline-none focus:border-[hsl(var(--color-primary))]/40 focus:bg-white transition-all"
+                        value={amount}
+                        onChange={e => setAmount(e.target.value ? Number(e.target.value) : '')}
+                      />
                     </div>
-                  </div>
+
+                    {/* Descripción */}
+                    <div className="space-y-1.5">
+                      <label className="font-mono text-[10px] uppercase tracking-widest text-slate-400 font-bold block">
+                        Descripción / Detalle
+                      </label>
+                      <input
+                        type="text"
+                        placeholder={modalType === 'income' ? 'Ej. Venta del mural grande' : 'Ej. Compra de acrílicos y pinceles'}
+                        required
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-text text-slate-800 focus:outline-none focus:border-[hsl(var(--color-primary))]/40 focus:bg-white transition-all"
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                      />
+                    </div>
+
+                    {/* Categoría */}
+                    <div className="space-y-1.5">
+                      <label className="font-mono text-[10px] uppercase tracking-widest text-slate-400 font-bold block">
+                        Categoría
+                      </label>
+                      <select
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-text text-slate-800 focus:outline-none focus:border-[hsl(var(--color-primary))]/40 focus:bg-white transition-all cursor-pointer"
+                        value={category}
+                        onChange={e => setCategory(e.target.value)}
+                      >
+                        {modalType === 'income' ? (
+                          <>
+                            <option value="anticipo">💰 Anticipo / Pago Parcial</option>
+                            <option value="cobro_final">💵 Cobro Final / Venta</option>
+                            <option value="otro">🏷️ Otro Ingreso</option>
+                          </>
+                        ) : (
+                          <>
+                            <option value="materiales">🎨 Materiales e Insumos</option>
+                            <option value="viaticos">🚚 Logística y Viáticos</option>
+                            <option value="suscripcion">⚡ Herramientas Digitales</option>
+                            <option value="taller">🏢 Alquiler / Servicios de Taller</option>
+                            <option value="equipo">⚙️ Equipos y Herramientas</option>
+                            <option value="personal">👥 Personal / Ayudantes</option>
+                            <option value="otro">🏷️ Otro Gasto</option>
+                          </>
+                        )}
+                      </select>
+                    </div>
+
+                    {/* Asociar a un Proyecto (Opcional) */}
+                    <div className="space-y-1.5">
+                      <label className="font-mono text-[10px] uppercase tracking-widest text-slate-400 font-bold block">
+                        Asociar a un Proyecto (Opcional)
+                      </label>
+                      <select
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-text text-slate-800 focus:outline-none focus:border-[hsl(var(--color-primary))]/40 focus:bg-white transition-all cursor-pointer"
+                        value={productId}
+                        onChange={e => setProductId(e.target.value)}
+                      >
+                        <option value="">Ninguno (No asociar a proyecto)</option>
+                        {products.map(p => (
+                          <option key={p.id} value={p.id}>
+                            {p.type === 'custom' ? '⭐' : '📦'} {p.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Botón de Enviar */}
+                    <button
+                      type="submit"
+                      className={`w-full h-12 text-white rounded-2xl font-disp font-bold text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-2 hover:-translate-y-0.5 transition-all active:scale-[0.98] cursor-pointer ${
+                        modalType === 'income'
+                          ? 'bg-emerald-500 hover:bg-emerald-600 shadow-[0_4px_12px_rgba(16,185,129,0.2)]'
+                          : 'bg-rose-500 hover:bg-rose-600 shadow-[0_4px_12px_rgba(244,63,94,0.2)]'
+                      }`}
+                    >
+                      Guardar Movimiento
+                    </button>
+                  </form>
                 </motion.div>
               </Dialog.Content>
             </Dialog.Portal>

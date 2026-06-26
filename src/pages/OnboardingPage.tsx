@@ -11,7 +11,7 @@ interface ExpenseItem {
   name: string;
   amount: number;
   icon: string;
-  category: 'personal' | 'digital' | 'business';
+  category: 'personal' | 'digital' | 'business' | 'otros';
   selected: boolean;
 }
 
