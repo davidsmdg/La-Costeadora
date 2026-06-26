@@ -159,8 +159,8 @@ export default function CreationPage() {
   return (
     <div className="min-h-screen bg-[var(--color-canvas)] text-slate-800 flex flex-col font-text pb-24 w-full">
       
-      {/* A. STICKY HEADER (El Semáforo) */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100 py-5 px-6 md:px-12 shadow-[0_2px_15px_rgba(0,0,0,0.01)]">
+      {/* A. FIXED HEADER (El Semáforo) */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-100 py-5 px-6 md:px-12 shadow-[0_2px_15px_rgba(0,0,0,0.03)] w-full">
         <div className="max-w-6xl mx-auto flex justify-between items-center w-full">
            <button onClick={() => navigate('/dashboard')} className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
               <ArrowLeft size={18} />
@@ -179,7 +179,7 @@ export default function CreationPage() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-6xl mx-auto px-6 md:px-12 py-8 w-full flex flex-col gap-8">
+      <main className="flex-1 max-w-6xl mx-auto px-6 md:px-12 pt-28 pb-8 w-full flex flex-col gap-8">
         
         {/* ADN DE LA CREACIÓN (Destacado y Explicativo) */}
         <section className="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.015)] space-y-4">
@@ -189,46 +189,66 @@ export default function CreationPage() {
             <p className="font-text text-xs text-slate-400">Define cómo se distribuirán y sumarán los costos fijos y variables de este desarrollo.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <button
               type="button"
               onClick={() => setCreationType('project')}
-              className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden group cursor-pointer flex flex-col gap-2 ${
+              className={`p-6 rounded-3xl border-2 text-left transition-all relative overflow-hidden group cursor-pointer flex flex-col gap-2.5 ${
                 creationType === 'project'
-                  ? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary))]/4 shadow-[0_4px_20px_rgba(255,20,147,0.05)]'
-                  : 'border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-200'
+                  ? 'border-indigo-650 bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 text-white shadow-[0_10px_25px_rgba(99,102,241,0.3)]'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100/70 hover:border-slate-300 text-slate-700'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🎨</span>
-                <span className="font-disp font-black text-sm text-slate-800">Proyecto a Medida</span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl filter drop-shadow-sm">🎨</span>
+                <span className={`font-disp font-black text-sm uppercase tracking-wide ${
+                  creationType === 'project' ? 'text-white' : 'text-slate-800'
+                }`}>
+                  Proyecto a Medida
+                </span>
               </div>
-              <p className="font-text text-xs text-slate-500 leading-relaxed">
+              <p className={`font-text text-xs leading-relaxed ${
+                creationType === 'project' ? 'text-indigo-100/90 font-medium' : 'text-slate-500'
+              }`}>
                 Una pieza única o encargo personalizado. Los costos se calculan sobre la totalidad del proyecto.
               </p>
-              <span className="font-mono text-[10px] text-slate-400 font-bold block mt-1">
-                💡 Ejemplo: Un mural en una oficina, un cuadro por encargo o una escultura personalizada.
+              <span className={`font-text text-[11px] px-3 py-2 rounded-xl block border mt-1.5 leading-relaxed ${
+                creationType === 'project' 
+                  ? 'text-yellow-200 bg-indigo-950/40 border-indigo-500/25 font-bold' 
+                  : 'text-slate-500 bg-slate-200/50 border-slate-300/30'
+              }`}>
+                💡 <strong>Ejemplo:</strong> Un mural en una oficina, un cuadro por encargo o una escultura personalizada.
               </span>
             </button>
 
             <button
               type="button"
               onClick={() => setCreationType('product')}
-              className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden group cursor-pointer flex flex-col gap-2 ${
+              className={`p-6 rounded-3xl border-2 text-left transition-all relative overflow-hidden group cursor-pointer flex flex-col gap-2.5 ${
                 creationType === 'product'
-                  ? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary))]/4 shadow-[0_4px_20px_rgba(255,20,147,0.05)]'
-                  : 'border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-200'
+                  ? 'border-teal-650 bg-gradient-to-br from-teal-600 via-teal-700 to-emerald-850 text-white shadow-[0_10px_25px_rgba(20,184,166,0.3)]'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100/70 hover:border-slate-300 text-slate-700'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">📦</span>
-                <span className="font-disp font-black text-sm text-slate-800">Lote de Productos</span>
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl filter drop-shadow-sm">📦</span>
+                <span className={`font-disp font-black text-sm uppercase tracking-wide ${
+                  creationType === 'product' ? 'text-white' : 'text-slate-800'
+                }`}>
+                  Lote de Productos
+                </span>
               </div>
-              <p className="font-text text-xs text-slate-500 leading-relaxed">
+              <p className={`font-text text-xs leading-relaxed ${
+                creationType === 'product' ? 'text-teal-100/90 font-medium' : 'text-slate-500'
+              }`}>
                 Una serie o lote de unidades idénticas. Los costos fijos de inversión se dividen entre el número de unidades.
               </p>
-              <span className="font-mono text-[10px] text-slate-400 font-bold block mt-1">
-                💡 Ejemplo: Un tiraje de 50 grabados, un lote de 20 camisetas o un set de tazas cerámicas.
+              <span className={`font-text text-[11px] px-3 py-2 rounded-xl block border mt-1.5 leading-relaxed ${
+                creationType === 'product' 
+                  ? 'text-yellow-200 bg-teal-950/40 border-teal-500/25 font-bold' 
+                  : 'text-slate-500 bg-slate-200/50 border-slate-300/30'
+              }`}>
+                💡 <strong>Ejemplo:</strong> Un tiraje de 50 grabados, un lote de 20 camisetas o un set de tazas cerámicas.
               </span>
             </button>
           </div>
@@ -349,75 +369,91 @@ export default function CreationPage() {
                   >
                       <Plus size={14} /> Añadir Costo
                    </button>
-               </div>
-            </section>
+                </div>
+             </section>
 
-            {/* 3. Logística (Condicional) */}
-            {creationType === 'project' && (
-              <section className="space-y-3.5">
-                <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-1.5">
-                      <Truck size={15} className="text-amber-500" />
-                      <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Logística y Viáticos</h2>
-                   </div>
-                   <span className="font-mono text-xs font-bold text-slate-500">${math.logisticsTotal.toLocaleString()}</span>
-                </div>
-                <div className="flex flex-col gap-2.5">
-                   {logistics.map((log) => (
-                     <div key={log.id} className="bg-white p-4 rounded-xl flex justify-between items-center border border-slate-100 shadow-[0_4px_10px_rgba(0,0,0,0.015)]">
-                        <div className="flex flex-col gap-0.5">
-                           <span className="font-disp font-bold text-xs uppercase text-slate-800">{log.name}</span>
-                           <span className="font-mono text-[9px] font-bold text-slate-400">${log.unitPrice.toLocaleString()}</span>
-                        </div>
-                        <button onClick={() => removeLogistics(log.id)} className="text-slate-300 hover:text-rose-500 cursor-pointer"><Trash2 size={14}/></button>
-                     </div>
-                   ))}
-                   <button 
-                     onClick={() => setIsLogisticsModalOpen(true)}
-                     className="w-full py-3.5 border border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 rounded-2xl text-slate-500 font-disp text-xs font-bold flex items-center justify-center gap-2 hover:border-slate-300 transition-all cursor-pointer"
-                   >
-                      <Plus size={14} /> Añadir Gasto
-                   </button>
-                </div>
-              </section>
-            )}
-
-            {/* 4. Inversión y Lote (Condicional) */}
-            {creationType === 'product' && (
-              <section className="space-y-3.5">
-                <div className="flex items-center gap-1.5">
-                   <Construction size={15} className="text-[hsl(var(--color-primary))]" />
-                   <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Inversión y Lote</h2>
-                </div>
-                <div className="bg-slate-900 p-6 rounded-[2rem] text-white shadow-md space-y-6">
-                   <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-1.5">
-                         <label className="font-mono text-[8px] uppercase font-bold text-white/50">Inversión Total</label>
-                         <input 
-                           type="number"
-                           value={investment.total || ''}
-                           onChange={(e) => setInvestment({...investment, total: Number(e.target.value)})}
-                           className="w-full bg-white/5 border-b border-white/20 focus:border-white/50 font-mono font-black text-lg outline-none pb-1"
-                         />
-                      </div>
-                      <div className="space-y-1.5">
-                         <label className="font-mono text-[8px] uppercase font-bold text-white/50">Lote (Unidades)</label>
-                         <input 
-                           type="number"
-                           value={investment.estimatedUnits || ''}
-                           onChange={(e) => setInvestment({...investment, estimatedUnits: Number(e.target.value)})}
-                           className="w-full bg-white/5 border-b border-white/20 focus:border-white/50 font-mono font-black text-lg outline-none pb-1"
-                         />
-                      </div>
-                   </div>
-                   <div className="pt-4 border-t border-white/10 flex justify-between items-center font-mono text-[10px]">
-                      <span className="opacity-50">Impacto x Unidad:</span>
-                      <span className="font-black text-sm">${Math.round(math.investmentPerUnit).toLocaleString()}</span>
-                   </div>
-                </div>
-              </section>
-            )}
-
+             {/* Animación de desplegado entre secciones condicionales */}
+            <AnimatePresence mode="wait">
+              {creationType === 'project' ? (
+                <motion.div
+                  key="project-logistics"
+                  initial={{ opacity: 0, height: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, height: 'auto', scale: 1 }}
+                  exit={{ opacity: 0, height: 0, scale: 0.98 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  className="overflow-hidden"
+                >
+                  <section className="space-y-3.5 pt-2">
+                    <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-1.5">
+                          <Truck size={15} className="text-amber-500" />
+                          <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Logística y Viáticos</h2>
+                       </div>
+                       <span className="font-mono text-xs font-bold text-slate-500">${math.logisticsTotal.toLocaleString()}</span>
+                    </div>
+                    <div className="flex flex-col gap-2.5">
+                       {logistics.map((log) => (
+                         <div key={log.id} className="bg-white p-4 rounded-xl flex justify-between items-center border border-slate-100 shadow-[0_4px_10px_rgba(0,0,0,0.015)]">
+                            <div className="flex flex-col gap-0.5">
+                               <span className="font-disp font-bold text-xs uppercase text-slate-800">{log.name}</span>
+                               <span className="font-mono text-[9px] font-bold text-slate-400">${log.unitPrice.toLocaleString()}</span>
+                            </div>
+                            <button onClick={() => removeLogistics(log.id)} className="text-slate-300 hover:text-rose-500 cursor-pointer"><Trash2 size={14}/></button>
+                         </div>
+                       ))}
+                       <button 
+                         onClick={() => setIsLogisticsModalOpen(true)}
+                         className="w-full py-3.5 border border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 rounded-2xl text-slate-500 font-disp text-xs font-bold flex items-center justify-center gap-2 hover:border-slate-300 transition-all cursor-pointer"
+                       >
+                          <Plus size={14} /> Añadir Gasto
+                       </button>
+                    </div>
+                  </section>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="product-investment"
+                  initial={{ opacity: 0, height: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, height: 'auto', scale: 1 }}
+                  exit={{ opacity: 0, height: 0, scale: 0.98 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  className="overflow-hidden"
+                >
+                  <section className="space-y-3.5 pt-2">
+                    <div className="flex items-center gap-1.5">
+                       <Construction size={15} className="text-[hsl(var(--color-primary))]" />
+                       <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Inversión y Lote</h2>
+                    </div>
+                    <div className="bg-slate-900 p-6 rounded-[2rem] text-white shadow-md space-y-6">
+                       <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-1.5">
+                             <label className="font-mono text-[8px] uppercase font-bold text-white/50">Inversión Total</label>
+                             <input 
+                               type="number"
+                               value={investment.total || ''}
+                               onChange={(e) => setInvestment({...investment, total: Number(e.target.value)})}
+                               className="w-full bg-white/5 border-b border-white/20 focus:border-white/50 font-mono font-black text-lg outline-none pb-1"
+                             />
+                          </div>
+                          <div className="space-y-1.5">
+                             <label className="font-mono text-[8px] uppercase font-bold text-white/50">Lote (Unidades)</label>
+                             <input 
+                               type="number"
+                               value={investment.estimatedUnits || ''}
+                               onChange={(e) => setInvestment({...investment, estimatedUnits: Number(e.target.value)})}
+                               className="w-full bg-white/5 border-b border-white/20 focus:border-white/50 font-mono font-black text-lg outline-none pb-1"
+                             />
+                          </div>
+                       </div>
+                       <div className="pt-4 border-t border-white/10 flex justify-between items-center font-mono text-[10px]">
+                          <span className="opacity-50">Impacto x Unidad:</span>
+                          <span className="font-black text-sm">${Math.round(math.investmentPerUnit).toLocaleString()}</span>
+                       </div>
+                    </div>
+                  </section>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Right Column: Config and Pricing */}
