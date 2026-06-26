@@ -166,8 +166,8 @@ export default function CreationPage() {
   return (
     <div className={`min-h-screen text-slate-800 flex flex-col font-text pb-24 w-full transition-colors duration-500 ${
       creationType === 'project' 
-        ? 'bg-indigo-50/40 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.06)_0%,_transparent_35%)]' 
-        : 'bg-teal-50/40 bg-[radial-gradient(circle_at_top_right,rgba(20,184,166,0.06)_0%,_transparent_35%)]'
+        ? 'bg-indigo-100 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.1)_0%,_transparent_35%)]' 
+        : 'bg-emerald-100 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.1)_0%,_transparent_35%)]'
     }`}>
       
       {/* A. FIXED HEADER (El Semáforo) */}
@@ -457,13 +457,13 @@ export default function CreationPage() {
                     ))}
                   </AnimatePresence>
                   {materials.length === 0 && (
-                    <div className="py-8 text-center border border-dashed border-slate-200 bg-slate-50/50 rounded-2xl text-slate-400 font-text text-[10px]">
+                    <div className="py-8 text-center border border-dashed border-slate-200 bg-white rounded-2xl text-slate-400 font-text text-[10px]">
                       No has añadido costos de creación.
                     </div>
                   )}
                   <button 
                     onClick={() => setIsMaterialModalOpen(true)}
-                    className="w-full py-3.5 border border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 rounded-2xl text-slate-500 font-disp text-xs font-bold flex items-center justify-center gap-2 hover:border-slate-300 transition-all cursor-pointer"
+                    className="w-full py-3.5 border border-dashed border-slate-200 bg-white hover:bg-slate-50/80 rounded-2xl text-slate-500 font-disp text-xs font-bold flex items-center justify-center gap-2 hover:border-slate-300 transition-all cursor-pointer shadow-sm hover:shadow"
                   >
                       <Plus size={14} /> Añadir Costo
                    </button>
@@ -512,7 +512,7 @@ export default function CreationPage() {
                        ))}
                        <button 
                          onClick={() => setIsLogisticsModalOpen(true)}
-                         className="w-full py-3.5 border border-dashed border-slate-200 bg-slate-50/50 hover:bg-slate-50 rounded-2xl text-slate-500 font-disp text-xs font-bold flex items-center justify-center gap-2 hover:border-slate-300 transition-all cursor-pointer"
+                         className="w-full py-3.5 border border-dashed border-slate-200 bg-white hover:bg-slate-50/80 rounded-2xl text-slate-500 font-disp text-xs font-bold flex items-center justify-center gap-2 hover:border-slate-300 transition-all cursor-pointer shadow-sm hover:shadow"
                        >
                           <Plus size={14} /> Añadir Gasto
                        </button>

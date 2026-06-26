@@ -99,7 +99,7 @@ export default function DashboardPage() {
       return {
         productId: p.id,
         name: p.name,
-        color: PROJECT_COLORS[pIdx % PROJECT_COLORS.length],
+        color: p.color || PROJECT_COLORS[pIdx % PROJECT_COLORS.length],
         monthlyInfo,
       };
     });
