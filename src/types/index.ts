@@ -65,6 +65,7 @@ export interface Product {
   /** Materiales del inventario global usados en este producto */
   inventoryUsage?: InventoryUsage[];
   monthlySales?: MonthlySale[];
+  color?: string;
 }
 
 export interface MonthlySale {

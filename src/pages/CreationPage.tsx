@@ -29,6 +29,9 @@ export default function CreationPage() {
   // Help State
   const [helpContent, setHelpContent] = useState<{ title: string; description: string } | null>(null);
 
+  // Selected color State
+  const [color, setColor] = useState('#6366f1');
+
   // Modal State
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
   const [isLogisticsModalOpen, setIsLogisticsModalOpen] = useState(false);
@@ -137,7 +140,8 @@ export default function CreationPage() {
       productionCosts: materials,
       distributionCosts: creationType === 'project' ? logistics : [],
       amountCollected: 0,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      color: color
     };
 
     // 1. Agregar a la lista global
@@ -160,7 +164,11 @@ export default function CreationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-canvas)] text-slate-800 flex flex-col font-text pb-24 w-full">
+    <div className={`min-h-screen text-slate-800 flex flex-col font-text pb-24 w-full transition-colors duration-500 ${
+      creationType === 'project' 
+        ? 'bg-indigo-50/40 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.06)_0%,_transparent_35%)]' 
+        : 'bg-teal-50/40 bg-[radial-gradient(circle_at_top_right,rgba(20,184,166,0.06)_0%,_transparent_35%)]'
+    }`}>
       
       {/* A. FIXED HEADER (El Semáforo) */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-100 py-5 px-6 md:px-12 shadow-[0_2px_15px_rgba(0,0,0,0.03)] w-full">
@@ -269,28 +277,64 @@ export default function CreationPage() {
           <div className="lg:col-span-7 space-y-8">
             
             {/* INPUT NOMBRE (Primer campo a rellenar) */}
-            <section className="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.015)] flex flex-col gap-2.5">
-               <label className="font-mono text-[9px] uppercase font-bold text-slate-400 flex items-center gap-1.5">
-                 <span>{creationType === 'project' ? 'Nombre de tu proyecto a medida' : 'Nombre de tu producto'}</span>
-                 <button
-                   type="button"
-                   onClick={() => setHelpContent({
-                     title: creationType === 'project' ? 'Nombre del Proyecto a Medida' : 'Nombre del Producto',
-                     description: 'Escribe un nombre claro para identificar este desarrollo en tu bitácora o catálogo. Si es a medida, puedes incluir el nombre del cliente o el lugar. Si es un lote de productos, define el nombre del modelo o la serie.'
-                   })}
-                   className="text-slate-350 hover:text-slate-600 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
-                   title="Ver explicación"
-                 >
-                   <HelpCircle size={10} />
-                 </button>
-               </label>
-               <input 
-                type="text" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={creationType === 'project' ? 'Ej: Mural Calle 10...' : 'Ej: Camiseta estampada...'}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4.5 font-disp font-bold text-base outline-none focus:border-[hsl(var(--color-primary))]/40 focus:bg-white transition-all placeholder:text-slate-350 text-slate-700 shadow-sm focus:shadow-md"
-               />
+            <section className="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.015)] flex flex-col gap-4">
+               <div className="flex flex-col gap-2.5">
+                 <label className="font-mono text-[9px] uppercase font-bold text-slate-400 flex items-center gap-1.5">
+                   <span>{creationType === 'project' ? 'Nombre de tu proyecto a medida' : 'Nombre de tu producto'}</span>
+                   <button
+                     type="button"
+                     onClick={() => setHelpContent({
+                       title: creationType === 'project' ? 'Nombre del Proyecto a Medida' : 'Nombre del Producto',
+                       description: 'Escribe un nombre claro para identificar este desarrollo en tu bitácora o catálogo. Si es a medida, puedes incluir el nombre del cliente o el lugar. Si es un lote de productos, define el nombre del modelo o la serie.'
+                     })}
+                     className="text-slate-350 hover:text-slate-600 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
+                     title="Ver explicación"
+                   >
+                     <HelpCircle size={10} />
+                   </button>
+                 </label>
+                 <input 
+                  type="text" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={creationType === 'project' ? 'Ej: Mural Calle 10...' : 'Ej: Camiseta estampada...'}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4.5 font-disp font-bold text-base outline-none focus:border-[hsl(var(--color-primary))]/40 focus:bg-white transition-all placeholder:text-slate-355 text-slate-700 shadow-sm focus:shadow-md"
+                 />
+               </div>
+
+               {/* SELECCIONAR COLOR IDENTIFICATIVO */}
+               <div className="flex flex-col gap-2 pt-3.5 border-t border-slate-100">
+                 <label className="font-mono text-[9px] uppercase font-bold text-slate-400">
+                   Color identificativo del proyecto
+                 </label>
+                 <div className="flex flex-wrap gap-2.5 mt-1.5">
+                   {[
+                     { value: '#6366f1', name: 'Índigo' },
+                     { value: '#14b8a6', name: 'Turquesa' },
+                     { value: '#f43f5e', name: 'Fucsia' },
+                     { value: '#f59e0b', name: 'Ámbar' },
+                     { value: '#10b981', name: 'Esmeralda' },
+                     { value: '#f97316', name: 'Naranja' }
+                   ].map(c => (
+                     <button
+                       key={c.value}
+                       type="button"
+                       onClick={() => setColor(c.value)}
+                       className={`w-7 h-7 rounded-full transition-all cursor-pointer relative flex items-center justify-center border-2 ${
+                         color === c.value 
+                           ? 'border-slate-800 scale-110 shadow-sm' 
+                           : 'border-transparent hover:scale-105'
+                       }`}
+                       style={{ backgroundColor: c.value }}
+                       title={c.name}
+                     >
+                       {color === c.value && (
+                         <span className="w-2 h-2 rounded-full bg-white shadow-xs" />
+                       )}
+                     </button>
+                   ))}
+                 </div>
+               </div>
             </section>
 
             {/* 1. Mano de Obra */}

@@ -233,6 +233,7 @@ export function FinancialDataProvider({ children }: { children: React.ReactNode 
                 month: ms.month,
                 unitsSold: Number(ms.units_sold) || 0,
               })),
+              color: localStorage.getItem(`la_costeadora_colors_${p.id}`) || undefined
             }
           }),
           inventoryItems: (inventoryRes.data || []).map((i: any) => ({
@@ -414,6 +415,10 @@ export function FinancialDataProvider({ children }: { children: React.ReactNode 
     const newId = crypto.randomUUID()
     const createdAt = new Date().toISOString()
     const fullProduct: Product = { ...product, id: newId, createdAt, monthlySales: [] }
+
+    if (product.color) {
+      localStorage.setItem(`la_costeadora_colors_${newId}`, product.color)
+    }
 
     dispatch({ type: 'ADD_PRODUCT', payload: fullProduct })
     if (!user) return

@@ -348,7 +348,8 @@ export default function DashboardPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.06 }}
                       onClick={() => setSelectedProductId(project.id)}
-                      className="group bg-white border border-slate-100 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all duration-300 active:scale-[0.99] shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col justify-between min-h-[140px]"
+                      className="group bg-white border border-slate-100 border-l-4 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all duration-300 active:scale-[0.99] shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col justify-between min-h-[140px]"
+                      style={{ borderLeftColor: project.color || '#cbd5e1' }}
                     >
                       {/* Top row */}
                       <div className="flex items-start justify-between mb-3.5 gap-2">
