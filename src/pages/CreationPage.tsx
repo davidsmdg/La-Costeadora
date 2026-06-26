@@ -180,6 +180,60 @@ export default function CreationPage() {
       </header>
 
       <main className="flex-1 max-w-6xl mx-auto px-6 md:px-12 py-8 w-full flex flex-col gap-8">
+        
+        {/* ADN DE LA CREACIÓN (Destacado y Explicativo) */}
+        <section className="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.015)] space-y-4">
+          <div className="flex flex-col gap-1">
+            <span className="font-mono text-[9px] uppercase tracking-wider font-extrabold text-[hsl(var(--color-primary))]">ADN de la Creación</span>
+            <h2 className="font-disp font-black text-xl text-slate-800">¿Qué tipo de costo estamos calculando?</h2>
+            <p className="font-text text-xs text-slate-400">Define cómo se distribuirán y sumarán los costos fijos y variables de este desarrollo.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setCreationType('project')}
+              className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden group cursor-pointer flex flex-col gap-2 ${
+                creationType === 'project'
+                  ? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary))]/4 shadow-[0_4px_20px_rgba(255,20,147,0.05)]'
+                  : 'border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🎨</span>
+                <span className="font-disp font-black text-sm text-slate-800">Proyecto a Medida</span>
+              </div>
+              <p className="font-text text-xs text-slate-500 leading-relaxed">
+                Una pieza única o encargo personalizado. Los costos se calculan sobre la totalidad del proyecto.
+              </p>
+              <span className="font-mono text-[10px] text-slate-400 font-bold block mt-1">
+                💡 Ejemplo: Un mural en una oficina, un cuadro por encargo o una escultura personalizada.
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setCreationType('product')}
+              className={`p-5 rounded-2xl border-2 text-left transition-all relative overflow-hidden group cursor-pointer flex flex-col gap-2 ${
+                creationType === 'product'
+                  ? 'border-[hsl(var(--color-primary))] bg-[hsl(var(--color-primary))]/4 shadow-[0_4px_20px_rgba(255,20,147,0.05)]'
+                  : 'border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📦</span>
+                <span className="font-disp font-black text-sm text-slate-800">Lote de Productos</span>
+              </div>
+              <p className="font-text text-xs text-slate-500 leading-relaxed">
+                Una serie o lote de unidades idénticas. Los costos fijos de inversión se dividen entre el número de unidades.
+              </p>
+              <span className="font-mono text-[10px] text-slate-400 font-bold block mt-1">
+                💡 Ejemplo: Un tiraje de 50 grabados, un lote de 20 camisetas o un set de tazas cerámicas.
+              </span>
+            </button>
+          </div>
+        </section>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Left Column: Cost Elements */}
@@ -369,37 +423,7 @@ export default function CreationPage() {
           {/* Right Column: Config and Pricing */}
           <div className="lg:col-span-5 space-y-8 lg:sticky lg:top-40">
             
-            {/* B. SELECTOR DE ADN (ToggleGroup) */}
-            <section className="flex flex-col gap-2.5">
-               <label className="font-mono text-[9px] uppercase font-bold text-slate-400">ADN de la Creación</label>
-               <ToggleGroup.Root 
-                type="single" 
-                value={creationType} 
-                onValueChange={(val) => val && setCreationType(val as any)}
-                className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100"
-               >
-                  <ToggleGroup.Item 
-                    value="project" 
-                    className={`flex-1 py-3 rounded-xl font-disp font-bold text-xs transition-all cursor-pointer ${
-                      creationType === 'project' 
-                        ? 'bg-white text-slate-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] border border-slate-100/50' 
-                        : 'text-slate-400 hover:text-slate-650'
-                    }`}
-                  >
-                    🎨 Proyecto
-                  </ToggleGroup.Item>
-                  <ToggleGroup.Item 
-                    value="product" 
-                    className={`flex-1 py-3 rounded-xl font-disp font-bold text-xs transition-all cursor-pointer ${
-                      creationType === 'product' 
-                        ? 'bg-white text-slate-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] border border-slate-100/50' 
-                        : 'text-slate-400 hover:text-slate-650'
-                    }`}
-                  >
-                    📦 Producto
-                  </ToggleGroup.Item>
-               </ToggleGroup.Root>
-            </section>
+
 
             {/* INPUT NOMBRE */}
             <section className="flex flex-col gap-2.5">
