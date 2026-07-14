@@ -85,12 +85,9 @@ export default function ProjectStudioPage() {
     setIsAddModalOpen(false);
   };
 
-  if (!project) {
-    return <div className="p-10 text-center font-mono">Proyecto no encontrado</div>;
-  }
-
   // --- MATH RE-CALCULATION (Real Time) ---
   const math = useMemo(() => {
+    if (!project) return null;
     const isProduct = project.type === 'product';
     const prodFixed = simCosts.filter(c => c.isFixed).reduce((a, c) => a + c.quantity * c.unitPrice, 0);
     const prodVariable = simCosts.filter(c => !c.isFixed).reduce((a, c) => a + c.quantity * c.unitPrice, 0);
@@ -99,7 +96,7 @@ export default function ProjectStudioPage() {
       ? prodVariable + (simUnits > 0 ? prodFixed / simUnits : 0)
       : simCosts.reduce((a, c) => a + c.quantity * c.unitPrice, 0);
 
-    const distributionTotal = project.distributionCosts.reduce((a, c) => a + c.quantity * c.unitPrice, 0);
+    const distributionTotal = (project.distributionCosts || []).reduce((a, c) => a + c.quantity * c.unitPrice, 0);
     const investmentPerUnit = simUnits > 0 ? project.initialInvestment / simUnits : 0;
     const productCost = productionTotal + distributionTotal + investmentPerUnit;
     const profitMargin = simSellingPrice > 0 ? ((simSellingPrice - productCost) / simSellingPrice) * 100 : 0;
@@ -121,6 +118,10 @@ export default function ProjectStudioPage() {
   const toggleAuthorship = (costId: string) => {
     setSimCosts(prev => prev.map(c => c.id === costId ? { ...c, affectedByAuthorship: !c.affectedByAuthorship } : c));
   };
+
+  if (!project || !math) {
+    return <div className="p-10 text-center font-mono">Proyecto no encontrado</div>;
+  }
 
   const pieData = [
     { name: 'Cuota Fija', value: Math.max(math.productFixedShare, 0) },
