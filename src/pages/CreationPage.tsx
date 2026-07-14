@@ -131,13 +131,26 @@ export default function CreationPage() {
   };
 
   const handleSave = () => {
+    const finalProductionCosts = [...materials];
+    if (labor.rate > 0 && labor.amount > 0) {
+      finalProductionCosts.push({
+        id: Math.random().toString(36).substr(2, 9),
+        name: `Mano de Obra (${labor.type === 'hour' ? 'Hora' : 'Día'})`,
+        quantity: labor.amount,
+        unitPrice: labor.rate,
+        category: 'production',
+        affectedByAuthorship: false,
+        isFixed: false
+      });
+    }
+
     const newProduct: Omit<Product, 'id'> = {
       name: name || (creationType === 'project' ? 'Nuevo Proyecto' : 'Nuevo Producto'),
       type: creationType === 'project' ? 'custom' : 'product',
       sellingPrice: sellingPrice,
       estimatedUnits: creationType === 'project' ? 1 : investment.estimatedUnits,
       initialInvestment: creationType === 'project' ? 0 : investment.total,
-      productionCosts: materials,
+      productionCosts: finalProductionCosts,
       distributionCosts: creationType === 'project' ? logistics : [],
       amountCollected: 0,
       createdAt: new Date().toISOString(),
