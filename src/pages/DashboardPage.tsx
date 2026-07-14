@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, ArrowUpRight, Edit3, DollarSign, History, TrendingUp, LogOut } from 'lucide-react';
+import { Plus, X, ArrowUpRight, Edit3, DollarSign, History, TrendingUp, LogOut, AlertTriangle } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
@@ -341,6 +341,12 @@ export default function DashboardPage() {
                   const collectedPct = Math.min((project.amountCollected / volume) * 100, 100);
                   const badge = statusBadge(math.marginStatus);
 
+                  // Check if sales are missing for the current month
+                  const now = new Date();
+                  const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                  const currentMonthSale = project.monthlySales?.find(s => s.month === currentMonthKey);
+                  const missingMonthlySale = !currentMonthSale || currentMonthSale.unitsSold === 0;
+
                   return (
                     <motion.div
                       key={project.id}
@@ -348,11 +354,11 @@ export default function DashboardPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.06 }}
                       onClick={() => setSelectedProductId(project.id)}
-                      className="group bg-white border border-slate-100 border-l-4 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all duration-300 active:scale-[0.99] shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col justify-between min-h-[140px]"
+                      className="group bg-white border border-slate-100 border-l-4 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all duration-300 active:scale-[0.99] shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col justify-between min-h-[155px]"
                       style={{ borderLeftColor: project.color || '#cbd5e1' }}
                     >
                       {/* Top row */}
-                      <div className="flex items-start justify-between mb-3.5 gap-2">
+                      <div className="flex items-start justify-between gap-2">
                         <div className="flex flex-col gap-0.5 min-w-0">
                           <span className="font-disp font-bold text-sm text-slate-800 truncate">
                             {project.name}
@@ -371,6 +377,16 @@ export default function DashboardPage() {
                           <ArrowUpRight size={14} className="text-slate-300 group-hover:text-[hsl(var(--color-primary))] transition-colors" />
                         </div>
                       </div>
+
+                      {/* Missing Monthly Income Notification */}
+                      {missingMonthlySale && (
+                        <div className="mt-2.5 mb-2.5 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-2 text-amber-600 self-start w-full">
+                          <AlertTriangle size={12} className="shrink-0 animate-bounce" />
+                          <span className="font-mono text-[8px] font-bold uppercase tracking-wider">
+                            Sin ingresos este mes
+                          </span>
+                        </div>
+                      )}
 
                       {/* Progress bar */}
                       <div className="space-y-1.5 mt-auto">
