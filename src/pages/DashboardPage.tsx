@@ -372,7 +372,17 @@ export default function DashboardPage() {
                   const now = new Date();
                   const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                   const currentMonthSale = project.monthlySales?.find(s => s.month === currentMonthKey);
-                  const missingMonthlySale = !currentMonthSale || currentMonthSale.unitsSold === 0;
+                  
+                  const currentMonthTxIncome = transactions
+                    .filter(t => t.productId === project.id && t.type === 'income' && !t.isProjection)
+                    .filter(t => {
+                      const tDate = new Date(t.date);
+                      const tMonthStr = `${tDate.getFullYear()}-${String(tDate.getMonth() + 1).padStart(2, '0')}`;
+                      return tMonthStr === currentMonthKey;
+                    })
+                    .reduce((sum, t) => sum + t.amount, 0);
+
+                  const missingMonthlySale = (!currentMonthSale || currentMonthSale.unitsSold === 0) && currentMonthTxIncome === 0;
 
                   return (
                     <motion.div
@@ -551,7 +561,16 @@ export default function DashboardPage() {
                                </div>
                                {(() => {
                                  const monthSale = selectedProject.monthlySales?.find(s => s.month === selectedMonth);
-                                 const isMissingSales = !monthSale || monthSale.unitsSold === 0;
+                                 const selectedMonthTxIncome = transactions
+                                   .filter(t => t.productId === selectedProject.id && t.type === 'income' && !t.isProjection)
+                                   .filter(t => {
+                                     const tDate = new Date(t.date);
+                                     const tMonthStr = `${tDate.getFullYear()}-${String(tDate.getMonth() + 1).padStart(2, '0')}`;
+                                     return tMonthStr === selectedMonth;
+                                   })
+                                   .reduce((sum, t) => sum + t.amount, 0);
+
+                                 const isMissingSales = (!monthSale || monthSale.unitsSold === 0) && selectedMonthTxIncome === 0;
                                  return (
                                    <button
                                      type="button"
