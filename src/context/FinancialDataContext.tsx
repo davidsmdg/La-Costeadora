@@ -233,7 +233,7 @@ export function FinancialDataProvider({ children }: { children: React.ReactNode 
                 month: ms.month,
                 unitsSold: Number(ms.units_sold) || 0,
               })),
-              color: localStorage.getItem(`la_costeadora_colors_${p.id}`) || undefined
+              color: p.color || undefined
             }
           }),
           inventoryItems: (inventoryRes.data || []).map((i: any) => ({
@@ -416,10 +416,6 @@ export function FinancialDataProvider({ children }: { children: React.ReactNode 
     const createdAt = new Date().toISOString()
     const fullProduct: Product = { ...product, id: newId, createdAt, monthlySales: [] }
 
-    if (product.color) {
-      localStorage.setItem(`la_costeadora_colors_${newId}`, product.color)
-    }
-
     dispatch({ type: 'ADD_PRODUCT', payload: fullProduct })
     if (!user) return
 
@@ -432,7 +428,8 @@ export function FinancialDataProvider({ children }: { children: React.ReactNode 
       estimated_units: product.estimatedUnits,
       initial_investment: product.initialInvestment,
       amount_collected: product.amountCollected,
-      created_at: createdAt
+      created_at: createdAt,
+      color: product.color
     })
 
     const allCosts = [
@@ -478,6 +475,7 @@ export function FinancialDataProvider({ children }: { children: React.ReactNode 
     if (data.estimatedUnits !== undefined) updateObj.estimated_units = data.estimatedUnits;
     if (data.initialInvestment !== undefined) updateObj.initial_investment = data.initialInvestment;
     if (data.amountCollected !== undefined) updateObj.amount_collected = data.amountCollected;
+    if (data.color !== undefined) updateObj.color = data.color;
 
     if (Object.keys(updateObj).length > 0) {
       await supabase.from('products').update(updateObj).eq('id', id)

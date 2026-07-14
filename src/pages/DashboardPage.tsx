@@ -543,6 +543,9 @@ export default function DashboardPage() {
                               <Dialog.Title className="font-disp text-xl font-extrabold text-slate-800 leading-tight">
                                 {selectedProject.name}
                               </Dialog.Title>
+                              <Dialog.Description className="sr-only">
+                                Detalles y rendimiento del proyecto {selectedProject.name}.
+                              </Dialog.Description>
                               <div 
                                 className="inline-flex items-center gap-1.5 font-mono text-[8px] font-bold uppercase px-2.5 py-1 rounded-full"
                                 style={{ color: badge.color, backgroundColor: badge.bg }}

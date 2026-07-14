@@ -257,19 +257,24 @@ export default function JournalPage() {
                   <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-6" />
 
                   <div className="flex justify-between items-center mb-5">
-                    <Dialog.Title className="font-disp text-lg font-black text-slate-800 flex items-center gap-2">
-                      {modalType === 'income' ? (
-                        <>
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                          Anotar una Venta / Ingreso
-                        </>
-                      ) : (
-                        <>
-                          <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                          Anotar un Gasto / Salida
-                        </>
-                      )}
-                    </Dialog.Title>
+                    <div>
+                      <Dialog.Title className="font-disp text-lg font-black text-slate-800 flex items-center gap-2">
+                        {modalType === 'income' ? (
+                          <>
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                            Anotar una Venta / Ingreso
+                          </>
+                        ) : (
+                          <>
+                            <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                            Anotar un Gasto / Salida
+                          </>
+                        )}
+                      </Dialog.Title>
+                      <Dialog.Description className="sr-only">
+                        Registra un movimiento en tu bitácora.
+                      </Dialog.Description>
+                    </div>
                     <Dialog.Close className="p-2 bg-slate-50 rounded-xl text-slate-400 hover:text-slate-650 transition-colors border border-slate-100 cursor-pointer">
                       <X size={15} />
                     </Dialog.Close>

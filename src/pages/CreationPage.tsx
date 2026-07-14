@@ -942,7 +942,10 @@ export default function CreationPage() {
            <Dialog.Overlay className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[60]" />
            <Dialog.Content className="fixed bottom-0 inset-x-0 bg-white rounded-t-[2.5rem] p-6 pb-12 z-[70] shadow-2xl flex flex-col gap-5 max-w-lg mx-auto border-t border-slate-100 focus:outline-none max-h-[85dvh] overflow-y-auto">
               <div className="flex justify-between items-center">
-                 <Dialog.Title className="font-disp text-base font-extrabold text-slate-800 uppercase tracking-wide">Añadir Logística y Viáticos</Dialog.Title>
+                 <div>
+                   <Dialog.Title className="font-disp text-base font-extrabold text-slate-800 uppercase tracking-wide">Añadir Logística y Viáticos</Dialog.Title>
+                   <Dialog.Description className="sr-only">Selecciona o introduce gastos de distribución para este desarrollo.</Dialog.Description>
+                 </div>
                  <Dialog.Close className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-650 transition-colors border border-slate-100 cursor-pointer"><X size={15} /></Dialog.Close>
               </div>
 
