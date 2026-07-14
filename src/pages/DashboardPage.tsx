@@ -378,9 +378,8 @@ export default function DashboardPage() {
                         </div>
                       </div>
 
-                      {/* Missing Monthly Income Notification */}
                       {missingMonthlySale && (
-                        <div className="mt-2.5 mb-2.5 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-2 text-amber-600 self-start w-full">
+                        <div className="mt-2.5 mb-2.5 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-2 text-amber-600 self-start w-full animate-[pulse_1.8s_infinite] shadow-[0_0_12px_rgba(245,158,11,0.15)]">
                           <AlertTriangle size={12} className="shrink-0 animate-bounce" />
                           <span className="font-mono text-[8px] font-bold uppercase tracking-wider">
                             Sin ingresos este mes
