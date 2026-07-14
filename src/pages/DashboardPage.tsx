@@ -379,10 +379,10 @@ export default function DashboardPage() {
                       </div>
 
                       {missingMonthlySale && (
-                        <div className="mt-2.5 mb-2.5 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl flex items-center gap-2 text-amber-600 self-start w-full animate-[pulse_1.8s_infinite] shadow-[0_0_12px_rgba(245,158,11,0.15)]">
-                          <AlertTriangle size={12} className="shrink-0 animate-bounce" />
-                          <span className="font-mono text-[8px] font-bold uppercase tracking-wider">
-                            Sin ingresos este mes
+                        <div className="mt-2.5 mb-2.5 px-3 py-2 bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 text-white border border-white/10 rounded-xl flex items-center gap-2 w-full animate-[pulse_1.8s_infinite] shadow-[0_4px_12px_rgba(244,63,94,0.3)] justify-center">
+                          <AlertTriangle size={12} className="shrink-0 animate-bounce text-white" />
+                          <span className="font-disp font-black text-[9px] uppercase tracking-wider">
+                            ¡Registrar ingresos de este mes!
                           </span>
                         </div>
                       )}
