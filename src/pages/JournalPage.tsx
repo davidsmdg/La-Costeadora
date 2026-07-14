@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, ArrowLeft, TrendingUp, History, Trash2, Calendar } from 'lucide-react';
+import { Plus, X, ArrowLeft, TrendingUp, History, Trash2, Calendar, LayoutGrid, ClipboardList } from 'lucide-react';
 import { useFinancialData } from '../context/FinancialDataContext';
 
 const formatCOP = (n: number) => '$' + n.toLocaleString('es-CO') + ' COP';
@@ -252,7 +252,7 @@ export default function JournalPage() {
                   animate={{ y: 0 }}
                   exit={{ y: '100%' }}
                   transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                  className="fixed bottom-0 inset-x-0 z-50 bg-white rounded-t-[2.5rem] pt-5 pb-10 px-6 shadow-2xl border-t border-slate-100 focus:outline-none max-w-lg mx-auto"
+                  className="fixed bottom-0 inset-x-0 z-50 bg-white rounded-t-[2.5rem] pt-5 pb-10 px-6 shadow-2xl border-t border-slate-100 focus:outline-none max-w-lg mx-auto max-h-[85dvh] overflow-y-auto"
                 >
                   <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-6" />
 
@@ -376,11 +376,11 @@ export default function JournalPage() {
 
       {/* Bottom Nav */}
       <nav className="bottom-nav">
-        <button onClick={() => navigate('/dashboard')} className="p-2 text-slate-400 hover:text-slate-650 hover:bg-slate-50 rounded-full transition-all cursor-pointer">
-          <TrendingUp size={16} />
+        <button onClick={() => navigate('/dashboard')} className="p-2 text-slate-400 hover:text-slate-650 hover:bg-slate-50 rounded-full transition-all cursor-pointer" title="Panel de Control">
+          <LayoutGrid size={16} />
         </button>
-        <button onClick={() => navigate('/journal')} className="p-2 bg-[hsl(var(--color-primary))] rounded-full text-white shadow-sm hover:bg-[hsl(var(--color-primary-hover))] transition-all cursor-pointer">
-          <History size={16} />
+        <button onClick={() => navigate('/journal')} className="p-2 bg-[hsl(var(--color-primary))] rounded-full text-white shadow-sm hover:bg-[hsl(var(--color-primary-hover))] transition-all cursor-pointer" title="Bitácora / Cuentas">
+          <ClipboardList size={16} />
         </button>
       </nav>
     </div>

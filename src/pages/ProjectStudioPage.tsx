@@ -12,7 +12,7 @@ import { CostItem } from '../types';
 export default function ProjectStudioPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { products, getProductMath, getTotalFixedExpenses, getMarginStatus, updateProduct, studio, inventoryItems } = useFinancialData();
+  const { products, getProductMath, getTotalFixedExpenses, getMarginStatus, updateProduct, removeProduct, studio, inventoryItems } = useFinancialData();
 
   const project = products.find(p => p.id === id);
   
@@ -20,6 +20,19 @@ export default function ProjectStudioPage() {
   const [simSellingPrice, setSimSellingPrice] = useState(project?.sellingPrice || 0);
   const [simUnits, setSimUnits] = useState(project?.estimatedUnits || 0);
   const [simCosts, setSimCosts] = useState<CostItem[]>(project?.productionCosts || []);
+
+  const handleDeleteProduct = async () => {
+    if (!project) return;
+    const confirmDelete = window.confirm(`¿Estás seguro de que deseas eliminar "${project.name}" permanentemente? Esta acción no se puede deshacer.`);
+    if (!confirmDelete) return;
+    try {
+      await removeProduct(project.id);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error(error);
+      alert("Hubo un error al intentar eliminar el producto.");
+    }
+  };
 
   // Dialog / Modal state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -122,14 +135,24 @@ export default function ProjectStudioPage() {
       {/* 1. STICKY TRAFFIC LIGHT (Cabecera) */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-100 py-5 px-6 md:px-12 shadow-[0_2px_15px_rgba(0,0,0,0.01)]">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/dashboard')} className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
-              <ArrowLeft size={18} />
-            </button>
-            <div>
-              <h1 className="font-disp text-lg font-extrabold tracking-tight text-slate-800">{project.name}</h1>
-              <span className="font-mono text-[9px] text-slate-400 uppercase font-bold tracking-wider">Estudio de Costeo</span>
+          <div className="flex items-center gap-4 justify-between w-full md:w-auto">
+            <div className="flex items-center gap-4">
+              <button onClick={() => navigate('/dashboard')} className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">
+                <ArrowLeft size={18} />
+              </button>
+              <div>
+                <h1 className="font-disp text-lg font-extrabold tracking-tight text-slate-800">{project.name}</h1>
+                <span className="font-mono text-[9px] text-slate-400 uppercase font-bold tracking-wider">Estudio de Costeo</span>
+              </div>
             </div>
+            <button
+              onClick={handleDeleteProduct}
+              className="p-2 bg-rose-50 border border-rose-100 hover:bg-rose-100 text-rose-500 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 font-disp text-[10px] font-bold uppercase tracking-wider shadow-sm hover:shadow"
+              title="Borrar Proyecto"
+            >
+              <Trash2 size={13} />
+              <span className="hidden sm:inline">Eliminar</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-3 gap-3 md:w-auto w-full md:min-w-[400px]">
@@ -160,9 +183,14 @@ export default function ProjectStudioPage() {
           <div className="lg:col-span-7 space-y-8">
             {/* 2. LA RECETA (Lista de Costos) */}
             <section className="space-y-4">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Calculator size={15} className="text-[hsl(var(--color-primary))]" />
-                <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Costos de Creación</h2>
+              <div className="flex flex-col gap-0.5 mb-1.5">
+                <div className="flex items-center gap-2">
+                  <Calculator size={15} className="text-[hsl(var(--color-primary))]" />
+                  <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Costos de Creación</h2>
+                </div>
+                <p className="font-text text-[10px] text-slate-500">
+                  💡 La estrella (⭐) indica <strong>Firma / Valor Simbólico</strong> del autor (agrega valor intangible).
+                </p>
               </div>
               
               <div className="flex flex-col gap-3">
@@ -361,7 +389,7 @@ export default function ProjectStudioPage() {
                 <Slider.Root
                   className="relative flex items-center select-none touch-none w-full h-5"
                   value={[simUnits]}
-                  max={Math.max(project.estimatedUnits * 5, 500)}
+                  max={Math.max(project.estimatedUnits * 5, 10000)}
                   step={1}
                   onValueChange={([val]) => setSimUnits(val)}
                 >
@@ -573,9 +601,9 @@ export default function ProjectStudioPage() {
                 {project.type === 'product' && (
                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-disp font-bold text-xs uppercase text-slate-800">Costo Fijo de Lote</span>
+                      <span className="font-disp font-bold text-xs uppercase text-slate-800">Costo Fijo de Serie</span>
                       <span className="font-text text-[10px] text-slate-400 leading-normal">
-                        Se amortiza dividiéndose entre todas las unidades estimadas del lote.
+                        Se amortiza dividiéndose entre todas las unidades estimadas de la serie.
                       </span>
                     </div>
                     <Switch.Root 

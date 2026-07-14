@@ -12,6 +12,13 @@ import {
 } from 'lucide-react';
 import { useFinancialData } from '../context/FinancialDataContext';
 import { Product, CostItem, InventoryItem } from '../types';
+interface LaborItem {
+  id: string;
+  name: string;
+  type: 'hour' | 'day';
+  rate: number;
+  amount: number;
+}
 
 export default function CreationPage() {
   const navigate = useNavigate();
@@ -20,7 +27,9 @@ export default function CreationPage() {
   // --- 1. ESTADO LOCAL DEL COMPONENTE ---
   const [creationType, setCreationType] = useState<'project' | 'product'>('project');
   const [name, setName] = useState('');
-  const [labor, setLabor] = useState({ type: 'hour' as 'hour' | 'day', rate: 0, amount: 0 });
+  const [labors, setLabors] = useState<LaborItem[]>([
+    { id: Math.random().toString(36).substr(2, 9), name: 'Líder', type: 'hour', rate: 0, amount: 0 }
+  ]);
   const [materials, setMaterials] = useState<CostItem[]>([]);
   const [logistics, setLogistics] = useState<CostItem[]>([]);
   const [investment, setInvestment] = useState({ total: 0, estimatedUnits: 1 });
@@ -43,6 +52,8 @@ export default function CreationPage() {
   const [customQuantity, setCustomQuantity] = useState(1);
   const [customIsFixed, setCustomIsFixed] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [logisticsName, setLogisticsName] = useState('');
+  const [logisticsPrice, setLogisticsPrice] = useState<number | ''>('');
 
   const filteredInventory = useMemo(() => {
     return (inventoryItems || []).filter(item =>
@@ -52,7 +63,7 @@ export default function CreationPage() {
 
   // --- 2. NÚCLEO MATEMÁTICO (useMemo) ---
   const math = useMemo(() => {
-    const laborTotal = labor.rate * labor.amount;
+    const laborTotal = labors.reduce((acc, l) => acc + (l.rate * l.amount), 0);
     
     const isProduct = creationType === 'product';
     const materialsFixed = materials.filter(m => m.isFixed).reduce((a, b) => a + (b.quantity * b.unitPrice), 0);
@@ -78,7 +89,7 @@ export default function CreationPage() {
       productCost,
       profitMargin
     };
-  }, [creationType, labor, materials, logistics, investment, sellingPrice]);
+  }, [creationType, labors, materials, logistics, investment, sellingPrice]);
 
   // --- ACCIONES ---
   const handleAddMaterial = (invItem: InventoryItem, qty: number) => {
@@ -120,6 +131,8 @@ export default function CreationPage() {
       affectedByAuthorship: false
     };
     setLogistics([...logistics, newItem]);
+    setLogisticsName('');
+    setLogisticsPrice('');
     setIsLogisticsModalOpen(false);
   };
 
@@ -132,19 +145,21 @@ export default function CreationPage() {
 
   const handleSave = () => {
     const finalProductionCosts = [...materials];
-    if (labor.rate > 0 && labor.amount > 0) {
-      finalProductionCosts.push({
-        id: Math.random().toString(36).substr(2, 9),
-        name: `Mano de Obra (${labor.type === 'hour' ? 'Hora' : 'Día'})`,
-        quantity: labor.amount,
-        unitPrice: labor.rate,
-        category: 'production',
-        affectedByAuthorship: false,
-        isFixed: false
-      });
-    }
+    labors.forEach((lab) => {
+      if (lab.rate > 0 && lab.amount > 0) {
+        finalProductionCosts.push({
+          id: lab.id,
+          name: `Mano de Obra - ${lab.name || 'Personal'} (${lab.type === 'hour' ? 'Hora' : 'Día'})`,
+          quantity: lab.amount,
+          unitPrice: lab.rate,
+          category: 'production',
+          affectedByAuthorship: false,
+          isFixed: false
+        });
+      }
+    });
 
-    const newProduct: Omit<Product, 'id'> = {
+    const newProduct: Omit<Product, 'id' | 'createdAt'> = {
       name: name || (creationType === 'project' ? 'Nuevo Proyecto' : 'Nuevo Producto'),
       type: creationType === 'project' ? 'custom' : 'product',
       sellingPrice: sellingPrice,
@@ -153,7 +168,6 @@ export default function CreationPage() {
       productionCosts: finalProductionCosts,
       distributionCosts: creationType === 'project' ? logistics : [],
       amountCollected: 0,
-      createdAt: new Date().toISOString(),
       color: color
     };
 
@@ -259,20 +273,20 @@ export default function CreationPage() {
                 <span className={`font-disp font-black text-sm uppercase tracking-wide ${
                   creationType === 'product' ? 'text-white' : 'text-slate-800'
                 }`}>
-                  Lote de Productos
+                  Serie de Productos
                 </span>
               </div>
               <p className={`font-text text-xs leading-relaxed ${
                 creationType === 'product' ? 'text-teal-100/90 font-medium' : 'text-slate-500'
               }`}>
-                Una serie o lote de unidades idénticas. Los costos fijos de inversión se dividen entre el número de unidades.
+                Una serie de unidades idénticas. Los costos fijos de inversión se dividen entre el número de unidades.
               </p>
               <span className={`font-text text-[11px] px-3 py-2 rounded-xl block border mt-1.5 leading-relaxed ${
                 creationType === 'product' 
                   ? 'text-yellow-200 bg-teal-950/40 border-teal-500/25 font-bold' 
                   : 'text-slate-500 bg-slate-200/50 border-slate-300/30'
               }`}>
-                💡 <strong>Ejemplo:</strong> Un tiraje de 50 grabados, un lote de 20 camisetas o un set de tazas cerámicas.
+                💡 <strong>Ejemplo:</strong> Un tiraje de 50 grabados, una serie de 20 camisetas o un set de tazas cerámicas.
               </span>
             </button>
           </div>
@@ -298,7 +312,7 @@ export default function CreationPage() {
                      type="button"
                      onClick={() => setHelpContent({
                        title: creationType === 'project' ? 'Nombre del Proyecto a Medida' : 'Nombre del Producto',
-                       description: 'Escribe un nombre claro para identificar este desarrollo en tu bitácora o catálogo. Si es a medida, puedes incluir el nombre del cliente o el lugar. Si es un lote de productos, define el nombre del modelo o la serie.'
+                       description: 'Escribe un nombre claro para identificar este desarrollo en tu bitácora o catálogo. Si es a medida, puedes incluir el nombre del cliente o el lugar. Si es una serie de productos, define el nombre del modelo o la serie.'
                      })}
                      className="text-slate-350 hover:text-slate-600 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
                      title="Ver explicación"
@@ -348,57 +362,130 @@ export default function CreationPage() {
                    ))}
                  </div>
                </div>
-            </section>
+             </section>
 
-            {/* 1. Mano de Obra */}
-            <section className="space-y-3.5">
-               <div className="flex items-center gap-1.5">
-                  <Briefcase size={15} className="text-[hsl(var(--color-primary))]" />
-                  <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Mano de Obra</h2>
-                  <button
-                    type="button"
-                    onClick={() => setHelpContent({
-                      title: 'Mano de Obra',
-                      description: 'Define cuánto vale tu tiempo de trabajo. Elige si cobrarás una tarifa por hora o por día, y la cantidad de tiempo total estimada que te tomará realizar la obra o producir el lote completo.'
-                    })}
-                    className="text-slate-350 hover:text-slate-650 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
-                    title="Ver explicación"
-                  >
-                    <HelpCircle size={11} />
-                  </button>
-               </div>
-               <div className="bg-white p-6 rounded-3xl border border-slate-100 flex flex-col gap-6 shadow-[0_4px_20px_rgba(0,0,0,0.015)]">
-                  <div className="flex justify-between items-center">
-                     <div className="flex bg-slate-50 border border-slate-100 rounded-lg overflow-hidden text-[9px] font-mono font-bold">
-                        <button onClick={() => setLabor({...labor, type: 'hour'})} className={`px-3 py-1.5 cursor-pointer ${labor.type === 'hour' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-100'}`}>X HORA</button>
-                        <button onClick={() => setLabor({...labor, type: 'day'})} className={`px-3 py-1.5 cursor-pointer ${labor.type === 'day' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-100'}`}>X DÍA</button>
+               {/* 1. Mano de Obra */}
+               <section className="space-y-3.5">
+                  <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-1.5">
+                        <Briefcase size={15} className="text-[hsl(var(--color-primary))]" />
+                        <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Mano de Obra</h2>
+                        <button
+                          type="button"
+                          onClick={() => setHelpContent({
+                            title: 'Mano de Obra',
+                            description: 'Registra a todas las personas que participan en la producción, incluyendo sus tarifas y tiempos. Puedes agregar al líder inicial, ayudantes u otros colaboradores.'
+                          })}
+                          className="text-slate-350 hover:text-slate-650 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
+                          title="Ver explicación"
+                        >
+                          <HelpCircle size={11} />
+                        </button>
                      </div>
                      <div className="text-right">
+                        <span className="font-mono text-xs font-bold text-slate-400 uppercase mr-1.5">Total:</span>
                         <span className="font-mono text-base font-black text-slate-700">${math.laborTotal.toLocaleString()}</span>
                      </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-6">
-                     <div className="space-y-1.5">
-                        <span className="font-mono text-[8px] uppercase font-bold text-slate-400">Tu Tarifa</span>
-                        <input 
-                          type="number"
-                          value={labor.rate || ''}
-                          onChange={(e) => setLabor({...labor, rate: Number(e.target.value)})}
-                          className="w-full bg-transparent border-b border-slate-200 focus:border-[hsl(var(--color-primary))] font-mono font-black text-lg text-slate-700 outline-none pb-1"
-                        />
-                     </div>
-                     <div className="space-y-1.5">
-                        <span className="font-mono text-[8px] uppercase font-bold text-slate-400">Cant. ({labor.type})</span>
-                        <input 
-                          type="number"
-                          value={labor.amount || ''}
-                          onChange={(e) => setLabor({...labor, amount: Number(e.target.value)})}
-                          className="w-full bg-transparent border-b border-slate-200 focus:border-[hsl(var(--color-primary))] font-mono font-black text-lg text-slate-700 outline-none pb-1"
-                        />
-                     </div>
+
+                  <div className="space-y-3">
+                    {labors.map((lab, index) => (
+                      <div key={lab.id} className="bg-white p-5 rounded-3xl border border-slate-100 flex flex-col gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.012)] relative group">
+                        {labors.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => setLabors(labors.filter(l => l.id !== lab.id))}
+                            className="absolute top-4 right-4 p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                            title="Eliminar colaborador"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                          <div className="space-y-1">
+                            <span className="font-mono text-[8px] uppercase font-bold text-slate-400">Nombre / Rol</span>
+                            <input 
+                              type="text"
+                              placeholder="Ej: Líder, Ayudante, Diseñador..."
+                              value={lab.name}
+                              onChange={(e) => {
+                                const updated = [...labors];
+                                updated[index].name = e.target.value;
+                                setLabors(updated);
+                              }}
+                              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-disp font-bold text-slate-700 outline-none focus:border-[hsl(var(--color-primary))]/40 focus:bg-white transition-all"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <span className="font-mono text-[8px] uppercase font-bold text-slate-400">Tipo de cobro</span>
+                            <div className="flex bg-slate-50 border border-slate-150 rounded-xl overflow-hidden text-[9px] font-mono font-bold w-full">
+                               <button 
+                                 type="button" 
+                                 onClick={() => {
+                                   const updated = [...labors];
+                                   updated[index].type = 'hour';
+                                   setLabors(updated);
+                                 }} 
+                                 className={`flex-1 py-2 cursor-pointer transition-all ${lab.type === 'hour' ? 'bg-slate-800 text-white shadow-xs' : 'text-slate-400 hover:bg-slate-100'}`}
+                               >
+                                 X HORA
+                               </button>
+                               <button 
+                                 type="button" 
+                                 onClick={() => {
+                                   const updated = [...labors];
+                                   updated[index].type = 'day';
+                                   setLabors(updated);
+                                 }} 
+                                 className={`flex-1 py-2 cursor-pointer transition-all ${lab.type === 'day' ? 'bg-slate-800 text-white shadow-xs' : 'text-slate-400 hover:bg-slate-100'}`}
+                               >
+                                 X DÍA
+                               </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="space-y-1.5">
+                              <span className="font-mono text-[8px] uppercase font-bold text-slate-400">Tarifa ($)</span>
+                              <input 
+                                type="number"
+                                placeholder="0"
+                                value={lab.rate || ''}
+                                onChange={(e) => {
+                                  const updated = [...labors];
+                                  updated[index].rate = Number(e.target.value);
+                                  setLabors(updated);
+                                }}
+                                className="w-full bg-transparent border-b border-slate-200 focus:border-[hsl(var(--color-primary))] font-mono font-black text-sm text-slate-700 outline-none pb-1"
+                              />
+                           </div>
+                           <div className="space-y-1.5">
+                              <span className="font-mono text-[8px] uppercase font-bold text-slate-400">Cantidad ({lab.type === 'hour' ? 'Horas' : 'Días'})</span>
+                              <input 
+                                type="number"
+                                placeholder="0"
+                                value={lab.amount || ''}
+                                onChange={(e) => {
+                                  const updated = [...labors];
+                                  updated[index].amount = Number(e.target.value);
+                                  setLabors(updated);
+                                }}
+                                className="w-full bg-transparent border-b border-slate-200 focus:border-[hsl(var(--color-primary))] font-mono font-black text-sm text-slate-700 outline-none pb-1"
+                              />
+                           </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setLabors([...labors, { id: Math.random().toString(36).substr(2, 9), name: '', type: 'hour', rate: 0, amount: 0 }])}
+                      className="w-full py-3.5 border border-dashed border-slate-200 hover:border-slate-350 hover:bg-slate-50/50 rounded-2xl text-slate-500 font-disp text-[10px] uppercase font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    >
+                      <Plus size={14} /> Añadir Colaborador / Mano de Obra
+                    </button>
                   </div>
-               </div>
-            </section>
+               </section>
 
             {/* 2. Costos de Creación */}
             <section className="space-y-3.5">
@@ -409,7 +496,7 @@ export default function CreationPage() {
                     type="button"
                     onClick={() => setHelpContent({
                       title: 'Costos de Creación',
-                      description: 'Suma todos los materiales consumidos, mermas o insumos que requiere esta pieza. Si creas un producto en lote, puedes marcar insumos específicos como "Fijo" (el costo de un molde o matriz que se paga una sola vez y se divide entre todas las unidades) o "Variable" (el material consumido por cada unidad individual).'
+                      description: 'Suma todos los materiales consumidos, mermas o insumos que requiere esta pieza. Si creas un producto en serie, puedes marcar insumos específicos como "Fijo" (el costo de un molde o matriz que se paga una sola vez y se divide entre todas las unidades) o "Variable" (el material consumido por cada unidad individual).'
                     })}
                     className="text-slate-350 hover:text-slate-650 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
                     title="Ver explicación"
@@ -433,14 +520,26 @@ export default function CreationPage() {
                         }`}
                       >
                          <div className="flex items-center gap-4">
-                            <Switch.Root 
-                              checked={mat.affectedByAuthorship} 
-                              onCheckedChange={() => toggleAuthorship(mat.id)}
-                              className="w-8 h-5 bg-slate-100 rounded-full relative data-[state=checked]:bg-amber-400 transition-colors border border-slate-200 cursor-pointer"
-                            >
-                               <Switch.Thumb className="block w-3.5 h-3.5 bg-white rounded-full translate-x-0.5 transition-transform data-[state=checked]:translate-x-3.5 shadow-sm" />
-                               <Star size={8} className="absolute top-1.5 left-1 text-slate-300 pointer-events-none" />
-                            </Switch.Root>
+                            <div className="flex flex-col items-center">
+                              <Switch.Root 
+                                checked={mat.affectedByAuthorship} 
+                                onCheckedChange={() => toggleAuthorship(mat.id)}
+                                className="w-8 h-5 bg-slate-100 rounded-full relative data-[state=checked]:bg-amber-400 transition-colors border border-slate-200 cursor-pointer"
+                              >
+                                 <Switch.Thumb className="block w-3.5 h-3.5 bg-white rounded-full translate-x-0.5 transition-transform data-[state=checked]:translate-x-3.5 shadow-sm" />
+                                 <Star size={8} className="absolute top-1.5 left-1 text-slate-350 pointer-events-none" />
+                              </Switch.Root>
+                              <button
+                                type="button"
+                                onClick={() => setHelpContent({
+                                  title: 'Firma / Valor Simbólico (Estrella ⭐)',
+                                  description: 'Activa esta opción para indicar que este material o insumo representa un "valor simbólico" o una "firma de autor" especial, otorgándole una identidad artística única que agrega valor intangible al producto o proyecto.'
+                                })}
+                                className="font-mono text-[7px] text-slate-400 hover:text-slate-650 transition-colors mt-1 underline cursor-pointer"
+                              >
+                                ¿Firma?
+                              </button>
+                            </div>
                             <div className="flex flex-col gap-0.5">
                                <span className="font-disp font-bold text-xs uppercase text-slate-800">{mat.name}</span>
                                <div className="flex items-center gap-2 mt-0.5">
@@ -544,12 +643,12 @@ export default function CreationPage() {
                   <section className="space-y-3.5 pt-2">
                     <div className="flex items-center gap-1.5">
                        <Construction size={15} className="text-[hsl(var(--color-primary))]" />
-                       <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Inversión y Lote</h2>
+                       <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Inversión y Serie</h2>
                        <button
                          type="button"
                          onClick={() => setHelpContent({
-                           title: 'Inversión y Lote',
-                           description: 'Exclusivo para Lotes de Productos. Registra la inversión inicial no-material (ej. diseño conceptual, matricería, prototipado) y el número estimado de unidades que producirás en este lote. El sistema amortizará esta inversión dividiéndola entre las unidades.'
+                           title: 'Inversión y Serie',
+                           description: 'Exclusivo para Series de Productos. Registra la inversión inicial no-material (ej. diseño conceptual, matricería, prototipado) y el número estimado de unidades que producirás en esta serie. El sistema amortizará esta inversión dividiéndola entre las unidades.'
                          })}
                          className="text-slate-350 hover:text-slate-650 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
                          title="Ver explicación"
@@ -569,7 +668,7 @@ export default function CreationPage() {
                              />
                           </div>
                           <div className="space-y-1.5">
-                             <label className="font-mono text-[8px] uppercase font-bold text-white/50">Lote (Unidades)</label>
+                             <label className="font-mono text-[8px] uppercase font-bold text-white/50">Serie (Unidades)</label>
                              <input 
                                type="number"
                                value={investment.estimatedUnits || ''}
@@ -601,12 +700,19 @@ export default function CreationPage() {
                <div className="space-y-4">
                   <div className="flex justify-between items-center gap-4">
                      <div className="flex items-center gap-1.5">
-                        <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Fijar Precio Final</h2>
+                        <div className="flex flex-col gap-0.5">
+                          <h2 className="font-disp font-extrabold text-xs uppercase tracking-wider text-slate-400">Fijar Precio Final</h2>
+                          <p className="font-text text-[9px] text-slate-500 font-medium">
+                            {creationType === 'project' 
+                              ? 'Desplaza hasta el valor en el que quieres vender tu proyecto' 
+                              : 'Desplaza hasta el valor en el que quieres vender tu producto'}
+                          </p>
+                        </div>
                         <button
                           type="button"
                           onClick={() => setHelpContent({
                             title: 'Fijar Precio Final',
-                            description: 'El precio al que planeas vender la pieza única o cada unidad individual del lote. Al mover el control deslizante, podrás ver el porcentaje de margen de ganancia neto estimado en tiempo real (El Semáforo superior cambiará de color según la rentabilidad).'
+                            description: 'El precio al que planeas vender la pieza única o cada unidad individual de la serie. Al mover el control deslizante, podrás ver el porcentaje de margen de ganancia neto estimado en tiempo real (El Semáforo superior cambiará de color según la rentabilidad).'
                           })}
                           className="text-slate-350 hover:text-slate-650 transition-colors p-0.5 cursor-pointer flex items-center justify-center"
                           title="Ver explicación"
@@ -668,7 +774,7 @@ export default function CreationPage() {
       }}>
         <Dialog.Portal>
            <Dialog.Overlay className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[60]" />
-           <Dialog.Content className="fixed bottom-0 inset-x-0 bg-white rounded-t-[2.5rem] p-6 pb-12 z-[70] shadow-2xl flex flex-col gap-6 max-w-lg mx-auto border-t border-slate-100 focus:outline-none max-h-[85vh] overflow-y-auto">
+           <Dialog.Content className="fixed bottom-0 inset-x-0 bg-white rounded-t-[2.5rem] p-6 pb-12 z-[70] shadow-2xl flex flex-col gap-6 max-w-lg mx-auto border-t border-slate-100 focus:outline-none max-h-[85dvh] overflow-y-auto">
               <div className="flex justify-between items-start">
                  <div>
                    <Dialog.Title className="font-disp text-lg font-extrabold text-slate-800 uppercase tracking-tight">Costos de Creación</Dialog.Title>
@@ -794,9 +900,9 @@ export default function CreationPage() {
                   {creationType === 'product' && (
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                       <div className="flex flex-col gap-0.5">
-                        <span className="font-disp font-bold text-xs uppercase text-slate-800">Costo Fijo de Lote</span>
+                        <span className="font-disp font-bold text-xs uppercase text-slate-800">Costo Fijo de Serie</span>
                         <span className="font-text text-[10px] text-slate-400 leading-normal">
-                          Se amortiza dividiéndose entre todas las unidades estimadas del lote.
+                          Se amortiza dividiéndose entre todas las unidades estimadas de la serie.
                         </span>
                       </div>
                       <Switch.Root 
@@ -834,27 +940,77 @@ export default function CreationPage() {
       <Dialog.Root open={isLogisticsModalOpen} onOpenChange={setIsLogisticsModalOpen}>
         <Dialog.Portal>
            <Dialog.Overlay className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[60]" />
-           <Dialog.Content className="fixed bottom-0 inset-x-0 bg-white rounded-t-[2.5rem] p-6 pb-12 z-[70] shadow-2xl flex flex-col gap-6 max-w-lg mx-auto border-t border-slate-100 focus:outline-none">
+           <Dialog.Content className="fixed bottom-0 inset-x-0 bg-white rounded-t-[2.5rem] p-6 pb-12 z-[70] shadow-2xl flex flex-col gap-5 max-w-lg mx-auto border-t border-slate-100 focus:outline-none max-h-[85dvh] overflow-y-auto">
               <div className="flex justify-between items-center">
-                 <Dialog.Title className="font-disp text-lg font-extrabold text-slate-800">Logística y Viáticos</Dialog.Title>
-                 <Dialog.Close className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-600 transition-colors border border-slate-100 cursor-pointer"><X size={15} /></Dialog.Close>
+                 <Dialog.Title className="font-disp text-base font-extrabold text-slate-800 uppercase tracking-wide">Añadir Logística y Viáticos</Dialog.Title>
+                 <Dialog.Close className="p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-650 transition-colors border border-slate-100 cursor-pointer"><X size={15} /></Dialog.Close>
               </div>
-              <div className="grid grid-cols-1 gap-3">
-                 {[
-                   { name: 'Taxi / Transporte', price: 15 },
-                   { name: 'Almuerzo Trabajo', price: 10 },
-                   { name: 'Alquiler Equipos', price: 50 },
-                   { name: 'Otros Gastos', price: 20 },
-                 ].map(opt => (
-                   <button 
-                    key={opt.name}
-                    onClick={() => handleAddLogistics(opt)}
-                    className="flex justify-between items-center p-4 bg-slate-50/50 hover:bg-slate-50 border border-slate-100 rounded-2xl font-disp font-bold text-xs text-slate-700 cursor-pointer"
-                   >
-                      {opt.name}
-                      <span className="font-mono text-[hsl(var(--color-primary))] font-bold">${opt.price}</span>
-                   </button>
-                 ))}
+
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!logisticsName.trim() || !logisticsPrice || Number(logisticsPrice) <= 0) return;
+                  handleAddLogistics({ name: logisticsName.trim(), price: Number(logisticsPrice) });
+                }}
+                className="space-y-4"
+              >
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-mono text-[8px] uppercase tracking-widest text-slate-400 font-bold">
+                    Nombre del Gasto / Viático
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ej: Gasolina, Peajes, Hospedaje..."
+                    value={logisticsName}
+                    onChange={(e) => setLogisticsName(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-xs font-text text-slate-800 placeholder:text-slate-405 focus:outline-none focus:border-[hsl(var(--color-primary))] focus:bg-white transition-all"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-mono text-[8px] uppercase tracking-widest text-slate-400 font-bold">
+                    Costo Estimado (COP)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    placeholder="0"
+                    value={logisticsPrice === '' ? '' : logisticsPrice}
+                    onChange={(e) => setLogisticsPrice(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-xs font-text text-slate-800 placeholder:text-slate-405 focus:outline-none focus:border-[hsl(var(--color-primary))] focus:bg-white transition-all"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-3.5 bg-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-primary-hover))] text-white font-disp text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md cursor-pointer"
+                >
+                  Agregar Gasto
+                </button>
+              </form>
+
+              <div className="border-t border-slate-100 pt-4">
+                <span className="font-mono text-[8px] uppercase tracking-widest text-slate-400 font-bold block mb-3">
+                  Opciones rápidas (Predefinidas)
+                </span>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {[
+                    { name: 'Taxi / Transporte', price: 15000 },
+                    { name: 'Almuerzo Trabajo', price: 25000 },
+                    { name: 'Alquiler Equipos', price: 80000 },
+                    { name: 'Otros Gastos', price: 30000 },
+                  ].map(opt => (
+                    <button 
+                      key={opt.name}
+                      type="button"
+                      onClick={() => handleAddLogistics(opt)}
+                      className="flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100 border border-slate-150 rounded-xl font-disp font-bold text-[10px] text-slate-700 cursor-pointer"
+                    >
+                      <span className="truncate mr-1">{opt.name}</span>
+                      <span className="font-mono text-[hsl(var(--color-primary))] font-bold shrink-0">${opt.price.toLocaleString('es-CO')}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
            </Dialog.Content>
         </Dialog.Portal>
@@ -879,7 +1035,7 @@ export default function CreationPage() {
                   animate={{ y: 0 }}
                   exit={{ y: '100%' }}
                   transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                  className="fixed bottom-0 inset-x-0 z-[90] bg-white rounded-t-[2.5rem] pt-5 pb-10 px-6 shadow-2xl border-t border-slate-100 focus:outline-none max-w-lg mx-auto"
+                  className="fixed bottom-0 inset-x-0 z-[90] bg-white rounded-t-[2.5rem] pt-5 pb-10 px-6 shadow-2xl border-t border-slate-100 focus:outline-none max-w-lg mx-auto max-h-[85dvh] overflow-y-auto"
                 >
                   <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-6" />
 

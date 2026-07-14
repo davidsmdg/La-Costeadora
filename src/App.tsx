@@ -9,12 +9,14 @@ import ProjectStudioPage from './pages/ProjectStudioPage'
 
 import JournalPage from './pages/JournalPage'
 import CreationPage from './pages/CreationPage'
+import ScrollToTop from './components/ScrollToTop'
 
 export default function App() {
   return (
     <AuthProvider>
       <FinancialDataProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <div className="bg-[var(--color-canvas)] min-h-screen w-full overflow-x-hidden bg-[radial-gradient(circle_at_top_right,rgba(255,20,147,0.06)_0%,_transparent_35%),radial-gradient(circle_at_bottom_left,rgba(0,200,83,0.04)_0%,_transparent_35%)]">
             <Routes>
               <Route path="/login" element={<LoginPage />} />

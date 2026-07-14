@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, ArrowUpRight, Edit3, DollarSign, History, TrendingUp, LogOut, AlertTriangle } from 'lucide-react';
+import { Plus, X, ArrowUpRight, Edit3, DollarSign, History, TrendingUp, LogOut, AlertTriangle, LayoutGrid, ClipboardList } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
@@ -38,6 +38,8 @@ export default function DashboardPage() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
   const [salesUnits, setSalesUnits] = useState(0);
+  const [salesInputMode, setSalesInputMode] = useState<'units' | 'amount'>('units');
+  const [salesAmountInput, setSalesAmountInput] = useState<number | ''>('');
 
   const monthRange = React.useMemo(() => {
     const months = [];
@@ -79,7 +81,18 @@ export default function DashboardPage() {
       const monthlyInfo = monthRange.map(m => {
         const sale = p.monthlySales?.find(s => s.month === m.value);
         const unitsSold = sale ? sale.unitsSold : 0;
-        const actualEarnings = unitsSold * p.sellingPrice;
+        
+        // Sum incomes from transactions in bitácora
+        const monthTxIncome = transactions
+          .filter(t => t.productId === p.id && t.type === 'income' && !t.isProjection)
+          .filter(t => {
+            const tDate = new Date(t.date);
+            const tMonthStr = `${tDate.getFullYear()}-${String(tDate.getMonth() + 1).padStart(2, '0')}`;
+            return tMonthStr === m.value;
+          })
+          .reduce((sum, t) => sum + t.amount, 0);
+
+        const actualEarnings = (unitsSold * p.sellingPrice) + monthTxIncome;
         const advantage = prevSurplus; // surplus from previous month carried over
         const adjustedBudget = Math.max(0, baseBudget - advantage);
         const surplus = Math.max(0, actualEarnings - adjustedBudget);
@@ -103,7 +116,7 @@ export default function DashboardPage() {
         monthlyInfo,
       };
     });
-  }, [products, monthRange, getProductMath, PROJECT_COLORS]);
+  }, [products, monthRange, getProductMath, PROJECT_COLORS, transactions]);
 
   // Extract variables for the currently selected month
   const selectedMonthData = React.useMemo(() => {
@@ -129,19 +142,33 @@ export default function DashboardPage() {
     };
   }, [timelineData, selectedMonth]);
 
-  // Update salesUnits when month or product changes
+  // Update salesUnits and salesAmountInput when month or product changes
   useEffect(() => {
     if (selectedProductId && salesMonth) {
       const prod = products.find(p => p.id === selectedProductId);
       const sale = prod?.monthlySales?.find(s => s.month === salesMonth);
-      setSalesUnits(sale ? sale.unitsSold : 0);
+      const units = sale ? sale.unitsSold : 0;
+      setSalesUnits(units);
+      if (prod && prod.sellingPrice > 0) {
+        setSalesAmountInput(Math.round(units * prod.sellingPrice));
+      } else {
+        setSalesAmountInput(0);
+      }
     }
   }, [selectedProductId, salesMonth, products]);
 
   const handleSaveSales = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedProductId || !salesMonth) return;
-    await setMonthlySale(selectedProductId, salesMonth, salesUnits);
+    const prod = products.find(p => p.id === selectedProductId);
+    const price = prod?.sellingPrice || 1;
+
+    let units = salesUnits;
+    if (salesInputMode === 'amount') {
+      units = Number(salesAmountInput || 0) / (price || 1);
+    }
+
+    await setMonthlySale(selectedProductId, salesMonth, units);
     setIsSalesModalOpen(false);
   };
 
@@ -454,14 +481,16 @@ export default function DashboardPage() {
         <button 
           onClick={() => navigate('/dashboard')} 
           className="p-2 bg-[hsl(var(--color-primary))] rounded-full text-white shadow-sm hover:bg-[hsl(var(--color-primary-hover))] transition-all cursor-pointer"
+          title="Panel de Control"
         >
-          <TrendingUp size={16} />
+          <LayoutGrid size={16} />
         </button>
         <button 
           onClick={() => navigate('/journal')} 
           className="p-2 text-slate-400 hover:text-slate-650 hover:bg-slate-50 rounded-full transition-all cursor-pointer"
+          title="Bitácora / Cuentas"
         >
-          <History size={16} />
+          <ClipboardList size={16} />
         </button>
       </nav>
 
@@ -482,7 +511,7 @@ export default function DashboardPage() {
                   animate={{ y: 0 }}
                   exit={{ y: '100%' }}
                   transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                  className="fixed bottom-0 inset-x-0 z-50 bg-white rounded-t-[2.5rem] pt-5 pb-12 focus:outline-none max-h-[88vh] overflow-y-auto border-t border-slate-100 shadow-2xl max-w-lg mx-auto"
+                  className="fixed bottom-0 inset-x-0 z-50 bg-white rounded-t-[2.5rem] pt-5 pb-12 focus:outline-none max-h-[85dvh] overflow-y-auto border-t border-slate-100 shadow-2xl max-w-lg mx-auto"
                 >
                   {/* Drag Handle */}
                   <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
@@ -636,7 +665,7 @@ export default function DashboardPage() {
                   ¿Cómo te fue este mes?
                 </Dialog.Title>
                 <Dialog.Description className="font-text text-xs text-slate-400">
-                  Registra las unidades reales vendidas de este proyecto para actualizar su rendimiento.
+                  Registra las unidades reales vendidas o el monto total recaudado para actualizar su rendimiento.
                 </Dialog.Description>
               </div>
               <Dialog.Close className="p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-650 transition-colors cursor-pointer">
@@ -647,7 +676,7 @@ export default function DashboardPage() {
             <form onSubmit={handleSaveSales} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="font-mono text-[9px] uppercase tracking-widest text-slate-400 font-bold block">
-                  Proyecto
+                  Proyecto / Producto
                 </label>
                 <div className="w-full bg-slate-50 border border-slate-100 rounded-xl px-3.5 py-3 text-xs font-disp font-bold text-slate-600">
                   {selectedProject?.name}
@@ -671,22 +700,87 @@ export default function DashboardPage() {
 
               <div className="space-y-1.5">
                 <label className="font-mono text-[9px] uppercase tracking-widest text-slate-400 font-bold block">
-                  Unidades Reales Vendidas
+                  Método de Ingreso
                 </label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  value={salesUnits === 0 ? '' : salesUnits}
-                  onChange={(e) => setSalesUnits(parseInt(e.target.value) || 0)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-3 text-xs font-text text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[hsl(var(--color-primary))] focus:bg-white transition-all"
-                  placeholder="Ej. 120"
-                />
+                <div className="flex bg-slate-50 border border-slate-150 rounded-xl overflow-hidden text-[9px] font-mono font-bold w-full p-1 gap-1">
+                   <button 
+                     type="button" 
+                     onClick={() => setSalesInputMode('units')} 
+                     className={`flex-1 py-2 rounded-lg cursor-pointer transition-all ${salesInputMode === 'units' ? 'bg-slate-800 text-white shadow-xs' : 'text-slate-400 hover:bg-slate-100'}`}
+                   >
+                     POR UNIDADES
+                   </button>
+                   <button 
+                     type="button" 
+                     onClick={() => setSalesInputMode('amount')} 
+                     className={`flex-1 py-2 rounded-lg cursor-pointer transition-all ${salesInputMode === 'amount' ? 'bg-slate-800 text-white shadow-xs' : 'text-slate-400 hover:bg-slate-100'}`}
+                   >
+                     POR DINERO ($)
+                   </button>
+                </div>
               </div>
+
+              {salesInputMode === 'units' ? (
+                <div className="space-y-1.5">
+                  <label className="font-mono text-[9px] uppercase tracking-widest text-slate-400 font-bold block">
+                    Unidades Reales Vendidas
+                  </label>
+                  <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-xl pr-3.5">
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={salesUnits === 0 ? '' : salesUnits}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        setSalesUnits(val);
+                        if (selectedProject && selectedProject.sellingPrice > 0) {
+                          setSalesAmountInput(val * selectedProject.sellingPrice);
+                        }
+                      }}
+                      className="w-full bg-transparent border-none rounded-xl px-3.5 py-3 text-xs font-text text-slate-800 placeholder:text-slate-400 focus:outline-none"
+                      placeholder="Ej. 120"
+                    />
+                    {selectedProject && selectedProject.sellingPrice > 0 && (
+                      <span className="font-mono text-[9px] text-slate-400 shrink-0">
+                        = ${(salesUnits * selectedProject.sellingPrice).toLocaleString()} COP
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <label className="font-mono text-[9px] uppercase tracking-widest text-slate-400 font-bold block">
+                    Monto Recaudado ($ COP)
+                  </label>
+                  <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-xl pr-3.5">
+                    <input
+                      type="number"
+                      required
+                      min="0"
+                      value={salesAmountInput === '' ? '' : salesAmountInput}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        setSalesAmountInput(val);
+                        if (selectedProject && selectedProject.sellingPrice > 0) {
+                          setSalesUnits(Number((val / selectedProject.sellingPrice).toFixed(2)));
+                        }
+                      }}
+                      className="w-full bg-transparent border-none rounded-xl px-3.5 py-3 text-xs font-text text-slate-800 placeholder:text-slate-400 focus:outline-none"
+                      placeholder="Ej. 150000"
+                    />
+                    {selectedProject && selectedProject.sellingPrice > 0 && (
+                      <span className="font-mono text-[9px] text-slate-400 shrink-0">
+                        ≈ {salesUnits} Un.
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-primary-hover))] text-white font-disp font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center mt-4"
+                className="w-full py-3.5 bg-[hsl(var(--color-primary))] hover:bg-[hsl(var(--color-primary-hover))] text-white font-disp font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer text-center mt-4 shadow-sm"
               >
                 Guardar Rendimiento
               </button>

@@ -165,7 +165,7 @@ export default function CreationWizard() {
                    </div>
                    <div className="flex flex-col gap-1">
                       <h3 className="font-disp text-base font-bold uppercase text-slate-800">Producto de Catálogo</h3>
-                      <p className="text-[11px] text-slate-450 leading-relaxed font-text">Lotes, inventario, producción en serie y venta directa.</p>
+                      <p className="text-[11px] text-slate-450 leading-relaxed font-text">Series, inventario, producción en serie y venta directa.</p>
                    </div>
                 </button>
               </div>
@@ -275,7 +275,7 @@ export default function CreationWizard() {
                   <div className="flex flex-col gap-6">
                     <div className="bg-slate-900 p-6 rounded-[2rem] text-white shadow-md space-y-6">
                        <div className="flex justify-between items-center">
-                          <h3 className="font-disp font-bold uppercase text-xs text-white/80">Lógica de Lote</h3>
+                          <h3 className="font-disp font-bold uppercase text-xs text-white/80">Lógica de Serie</h3>
                           <Package size={18} className="opacity-55" />
                        </div>
                        <div className="grid grid-cols-2 gap-6">

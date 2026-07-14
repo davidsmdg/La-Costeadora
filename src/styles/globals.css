@@ -45,6 +45,14 @@
   --shadow-brutal:    0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
   --shadow-brutal-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   --shadow-brutal-inv: 0 10px 25px -5px rgba(255, 255, 255, 0.05);
+
+  /* --- Contraste de Texto Gris (Slate Overrides) --- */
+  --color-slate-300: #94a3b8;
+  --color-slate-350: #788596;
+  --color-slate-355: #6d7b8c;
+  --color-slate-400: #5c6b7d;
+  --color-slate-450: #4a5768;
+  --color-slate-500: #3c4755;
 }
 
 /* ============================================================
@@ -61,7 +69,7 @@ html, body, h1, h2, h3, h4, h5, h6, p, ol, ul, li, figure, figcaption, blockquot
 }
 
 html, body, #root {
-  height: 100%;
+  min-height: 100dvh;
   width: 100%;
   overflow-x: hidden;
 }
