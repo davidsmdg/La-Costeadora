@@ -364,8 +364,14 @@ export default function DashboardPage() {
                   const math = getProductMath(project.id);
                   if (!math) return null;
 
+                  const totalSalesEarnings = (project.monthlySales || []).reduce((sum, s) => sum + (s.unitsSold * project.sellingPrice), 0);
+                  const totalJournalIncome = transactions
+                    .filter(t => t.productId === project.id && t.type === 'income' && !t.isProjection)
+                    .reduce((sum, t) => sum + t.amount, 0);
+                  const totalCollected = totalSalesEarnings + totalJournalIncome;
+
                   const volume = project.sellingPrice * project.estimatedUnits;
-                  const collectedPct = Math.min((project.amountCollected / volume) * 100, 100);
+                  const collectedPct = volume > 0 ? Math.min((totalCollected / volume) * 100, 100) : 0;
                   const badge = statusBadge(math.marginStatus);
 
                   // Check if sales are missing for the current month
