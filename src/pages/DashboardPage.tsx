@@ -521,16 +521,25 @@ export default function DashboardPage() {
                                    Rendimiento Mensual
                                  </span>
                                </div>
-                               <button
-                                 type="button"
-                                 onClick={() => {
-                                   setSalesMonth(selectedMonth);
-                                   setIsSalesModalOpen(true);
-                                 }}
-                                 className="px-3 py-1 bg-[hsl(var(--color-primary))]/10 hover:bg-[hsl(var(--color-primary))]/20 text-[hsl(var(--color-primary))] font-disp text-[9px] font-bold uppercase tracking-wider rounded-full transition-all flex items-center gap-1 cursor-pointer"
-                               >
-                                 ¿Cómo te fue este mes?
-                               </button>
+                               {(() => {
+                                 const monthSale = selectedProject.monthlySales?.find(s => s.month === selectedMonth);
+                                 const isMissingSales = !monthSale || monthSale.unitsSold === 0;
+                                 return (
+                                   <button
+                                     type="button"
+                                     onClick={() => {
+                                       setSalesMonth(selectedMonth);
+                                       setIsSalesModalOpen(true);
+                                     }}
+                                     className={isMissingSales 
+                                       ? "px-4 py-2.5 bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 hover:scale-105 text-white font-disp text-[9px] font-black uppercase tracking-wider rounded-full transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_4px_15px_rgba(244,63,94,0.4)] animate-[pulse_1.8s_infinite] border border-white/20"
+                                       : "px-3 py-1 bg-[hsl(var(--color-primary))]/10 hover:bg-[hsl(var(--color-primary))]/20 text-[hsl(var(--color-primary))] font-disp text-[9px] font-bold uppercase tracking-wider rounded-full transition-all flex items-center gap-1 cursor-pointer"
+                                     }
+                                   >
+                                     {isMissingSales ? '⚠️ ¡Registrar ingresos de este mes!' : '¿Cómo te fue este mes?'}
+                                   </button>
+                                 );
+                               })()}
                              </div>
                             <div className="h-48 w-full bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
                               <ResponsiveContainer width="100%" height="100%">
